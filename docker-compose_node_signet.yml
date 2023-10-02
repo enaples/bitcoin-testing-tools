@@ -23,17 +23,6 @@ services:
       - "38333"
       - "38332"
 
-  electrs:
-    container_name: electrs
-    build:
-      context: electrs
-    image: electrs_img
-    volumes:
-      - shared_vol_btc:/bitcoind
-    network_mode: "host"
-    expose:
-      - "60601"
-
   nginx:
     container_name: nginx
     build:
