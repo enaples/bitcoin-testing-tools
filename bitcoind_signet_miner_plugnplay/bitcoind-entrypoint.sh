@@ -42,7 +42,7 @@ if [ $SIGNETCHALLENGE = false ]; then
     # Create a new wallet
     # Uncomment the following line if a custom wallet name is require and comment the `WALLET="wallet"` line.
     # read -p "Enter the name of the wallet: " WALLET
-    WALLET="wallet"
+    WALLET="sig_miner_wallet"
     bitcoin-cli -datadir=/bitcoind -named createwallet wallet_name="$WALLET" descriptors=true 2>&1 > /dev/null
     
     # Get the signet script from the 86 descriptor
@@ -78,7 +78,7 @@ done
 echo
 echo "bitcoind started"
 
-if [ $SIGNETCHALLENGE = false ]; then
+if [ $SIGNETCHALLENGE = false ] || [ ! -e /bitcoind/signet/wallets/$WALLET/wallet.dat ]; then
     # If there is any wallet, create a descriptor wallet
     bitcoin-cli -datadir=/bitcoind -named createwallet wallet_name="$WALLET" blank=true descriptors=true 2>&1 > /dev/null
     echo "================================================"
@@ -120,7 +120,7 @@ else
     # just load the existing wallet:
     echo "================================================"
     echo "Loading the main wallet:"
-    WALLET=$(ls /bitcoind/signet/wallets -1 | head -1 | tail -1)
+    WALLET="sig_miner_wallet"
     bitcoin-cli -datadir=/bitcoind loadwallet "$WALLET" 2>&1 >/dev/null
     echo "Bitcoin core wallet \"$WALLET\" loaded."
     echo "================================================"

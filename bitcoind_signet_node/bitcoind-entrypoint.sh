@@ -34,7 +34,7 @@ fi
 
 # If wallet that already exists, load, so don't fail if it does,
 # just load the existing wallet:
-WALLET=$(ls /bitcoind/signet/wallets -1 | head -1 | tail -1)
+WALLET="sig_node_wallet"
 if [ -f /bitcoind/signet/wallets/$WALLET/wallet.dat ]; then
     echo "================================================"
     echo "Loading the main wallet:"
@@ -45,8 +45,8 @@ if [ -f /bitcoind/signet/wallets/$WALLET/wallet.dat ]; then
 else
     echo "================================================"
     echo "Creating the main wallet:"
-    bitcoin-cli -datadir=/bitcoind -named createwallet wallet_name="main_wallet" descriptors=true 2>&1 > /dev/null
-    echo "Bitcoin core wallet \"main_wallet\" created."
+    bitcoin-cli -datadir=/bitcoind -named createwallet wallet_name="sig_node_wallet" descriptors=true 2>&1 > /dev/null
+    echo "Bitcoin core wallet \"$WALLET\" created."
     echo "================================================"
 fi
 
