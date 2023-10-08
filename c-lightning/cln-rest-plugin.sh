@@ -1,5 +1,3 @@
-
-
 # Add cln-REST plugin config to c-lightning config
 mkdir -p /lightningd/cln-plugins \
 && cd /lightningd/cln-plugins \
@@ -13,8 +11,8 @@ mkdir -p /lightningd/cln-plugins \
 && cd c-lightning-REST-${CLN_REST_VER} \
 && npm install \
 && echo "{
-  \"PORT\": 3092,
-  \"DOCPORT\": 4091,
+  \"PORT\": $CLN_PORT,
+  \"DOCPORT\": $CLN_DOCPORT,
   \"PROTOCOL\": \"http\",
   \"EXECMODE\": \"test\",
   \"RPCCOMMANDS\": [\"*\"],
@@ -24,8 +22,8 @@ mkdir -p /lightningd/cln-plugins \
 
 echo "# cln-rest-plugin
 plugin=/lightningd/cln-plugins/c-lightning-REST-${CLN_REST_VER}/clrest.js
-rest-port=3092
-rest-docport=4091
+rest-port=$CLN_PORT
+rest-docport=$CLN_DOCPORT
 rest-execmode=test
 rest-protocol=http
 rest-lnrpcpath=/lightningd/signet" >> "/lightningd/config"

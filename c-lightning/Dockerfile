@@ -33,19 +33,24 @@ RUN bitcoind-download.sh
 
 # Install c-lightning
 ENV CL_VER="23.02"
+ENV CL_PORT=39735
 COPY c-lightning-download.sh /usr/local/bin
 RUN chmod +x /usr/local/bin/c-lightning-download.sh
 RUN c-lightning-download.sh
 
-# Plugin ver
+# Plugins
 ENV CLN_REST_VER="0.10.5"
+ENV CLN_PORT=3092
+ENV CLN_DOCPORT=4091
 
 ADD https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/lightning-cli.bash-completion /usr/share/bash-completion/completions/lightning-cli
 
-COPY lightningd /data
+# COPY lightningd /data
 
 COPY c-lightning-entrypoint.sh /usr/local/bin
 RUN chmod +x /usr/local/bin/c-lightning-entrypoint.sh
+COPY create-config.sh /usr/local/bin
+RUN chmod +x /usr/local/bin/create-config.sh
 COPY fund-c-lightning.sh /usr/local/bin
 RUN chmod +x /usr/local/bin/fund-c-lightning.sh
 COPY logtail.sh /usr/local/bin
@@ -57,7 +62,7 @@ RUN chmod +x /usr/local/bin/cln-rest-plugin.sh
 COPY cli /usr/local/bin
 RUN chmod +x /usr/local/bin/cli
 
-EXPOSE 39735
+EXPOSE $CL_PORT
 ENTRYPOINT ["/usr/local/bin/c-lightning-entrypoint.sh"]
 
 # Show logs from beginning and keep following
