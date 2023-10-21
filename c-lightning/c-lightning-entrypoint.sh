@@ -50,7 +50,7 @@ else
     
 fi
 
-if [ $(lightning-cli listfunds | jq -r ".outputs" | jq "length <= 0") == true ]; then
+if [[ $(lightning-cli --lightning-dir=/lightningd listfunds | jq -r ".outputs" | jq "length <= 0") == "true" ]]; then
     echo "Funding c-lightning wallet"
     source /usr/local/bin/fund-c-lightning.sh
 else
