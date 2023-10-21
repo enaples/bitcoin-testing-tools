@@ -20,7 +20,7 @@ do
         NBITS=`cat /bitcoind/nbits_calibration.txt`
     else
         echo "Waiting for difficulty calibration..."
-        NBITS=`$MINER calibrate --grind-cmd="$GRIND" --seconds=600 | grep -oP 'nbits=\K[a-f0-9]+'`
+        NBITS=`$MINER calibrate --grind-cmd="$GRIND" --seconds=$BLOCK_MINING_SEC | grep -oP 'nbits=\K[a-f0-9]+'`
         echo "The number of bits is: $NBITS"
         echo $NBITS > /bitcoind/nbits_calibration.txt
     fi
