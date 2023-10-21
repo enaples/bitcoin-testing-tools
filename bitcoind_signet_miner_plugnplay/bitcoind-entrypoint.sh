@@ -1,6 +1,7 @@
 #!/bin/bash
 set -Eeuo pipefail
 
+WALLET="sig_miner_wallet"
 # Move bitcoin.conf to /bitcoind
 if [ -f "/data/bitcoin.conf" ]; then
     mv /data/bitcoin.conf /bitcoind/bitcoin.conf
@@ -42,7 +43,6 @@ if [ $SIGNETCHALLENGE = false ]; then
     # Create a new wallet
     # Uncomment the following line if a custom wallet name is require and comment the `WALLET="wallet"` line.
     # read -p "Enter the name of the wallet: " WALLET
-    WALLET="sig_miner_wallet"
     bitcoin-cli -datadir=/bitcoind -named createwallet wallet_name="$WALLET" descriptors=true 2>&1 > /dev/null
     
     # Get the signet script from the 86 descriptor
