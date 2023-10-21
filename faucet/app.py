@@ -26,7 +26,7 @@ def get_faucet():
             json={"jsonrpc": "1.0",
                   "id": "faucet",
                   "method": "sendtoaddress",
-                  "params": [address, 1.5, "fee_rate", 100]})
+                  "params": [address,  1.5, "", "", False, True, None, "unset", None, 5000.0]})
         return "Success"
     except:
         return 401
