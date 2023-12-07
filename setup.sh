@@ -81,24 +81,22 @@ create_docker_compose(){
             BLOCK_MINING_SEC: 600
         volumes:
             - shared_vol_btc:/bitcoind
-        network_mode: "host"
+        port:
+            - "38333:38333"
+            - "38332:38332"
         expose:
             - "38333"
             - "38332"
-        ports:
-            - "38333:38333"
-            - "38332:38332"
 
     faucet:
         container_name: faucet
         build:
             context: faucet
         image: faucet_img
-        network_mode: "host"
+        port:
+            - "5000:5000"
         expose:
             - "5000"
-        ports:
-            - "5000:5000"
 
 		EOF
         
@@ -112,13 +110,13 @@ create_docker_compose(){
         image: bitcoind_signet_node
         volumes:
             - shared_vol_btc:/bitcoind
-        network_mode: "host"
-        expose:
-            - "38333"
-            - "38332"
         ports:
             - "38333:38333"
             - "38332:38332"
+        expose:
+            - "38333"
+            - "38332"
+
 		EOF
     fi
     
@@ -128,13 +126,13 @@ create_docker_compose(){
         build:
             context: tor
         image: tor_img
-        network_mode: "host"
-        expose:
-            - "9050"
-            - "9051"
         ports:
             - "9050:9050"
             - "9051:9051"
+        expose:
+            - "9050"
+            - "9051"
+
 
     # electrs:
     #     container_name: electrs
@@ -143,11 +141,11 @@ create_docker_compose(){
     #     image: electrs_img
     #     volumes:
     #     - shared_vol_btc:/bitcoind
-    #     network_mode: "host"
-    #     expose:
-    #         - "60601"
     #     ports:
     #         - "60601:60601"
+    #     expose:
+    #         - "60601"
+
 
 
     # nginx:
@@ -155,11 +153,11 @@ create_docker_compose(){
     #     build:
     #         context: nginx
     #     image: nginx_img
-    #     network_mode: "host"
-    #     expose:
-    #         - "60602"
     #     ports:
     #         - "60602:60602"
+    #     expose:
+    #         - "60602"
+
 
     c-lightning:
         container_name: c-lightning
@@ -168,13 +166,13 @@ create_docker_compose(){
         image: core_lightning
         volumes:
             - shared_vol_ln:/lightningd
-        network_mode: "host"
-        expose:
-            - "39735"
-            - "3092"
         ports:
             - "39735:39735"
             - "3092:3092"
+        expose:
+            - "39735"
+            - "3092"
+
 
     lnbits:
         container_name: lnbits
@@ -183,11 +181,11 @@ create_docker_compose(){
         image: lnbits_img
         volumes:
             - shared_vol_ln:/lightningd
-        network_mode: "host"
-        expose:
-            - "7000"
         ports:
             - "7000:7000"
+        expose:
+            - "7000"
+
 
     rtl:
         container_name: rtl
@@ -196,11 +194,11 @@ create_docker_compose(){
         image: rtl_img
         volumes:
             - shared_vol_ln:/lightningd
-        network_mode: "host"
-        expose:
-            - "3000"
         ports:
             - "3000:3000"
+        expose:
+            - "3000"
+
 
 	EOF
     
@@ -219,16 +217,14 @@ create_docker_compose(){
             CLN_DOCPORT: $(( 4091 + i * 101))
         volumes:
             - shared_vol_ln-$i:/lightningd
-        network_mode: "host"
-        expose:
-            - "$(( 39735 + i * 101))"
-            - "$(( 3092 + i * 101))"
-            - "$(( 4091 + i * 101))"
         ports:
             - "$(( 39735 + i * 101)):$(( 39735 + i * 101))"
             - "$(( 3092 + i * 101)):$(( 3092 + i * 101))"
             - "$(( 4091 + i * 101)):$(( 4091 + i * 101))"
-
+        expose:
+            - "$(( 39735 + i * 101))"
+            - "$(( 3092 + i * 101))"
+            - "$(( 4091 + i * 101))"
 		EOF
     done
     

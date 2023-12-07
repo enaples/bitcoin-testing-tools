@@ -6,7 +6,9 @@ services:
     build:
       context: tor
     image: tor_img
-    network_mode: "host"
+    port:
+      - "9050:9050"
+      - "9051:9051"
     expose:
       - "9050"
       - "9051"
@@ -18,7 +20,9 @@ services:
     image: bitcoind_signet_miner
     volumes:
       - shared_vol_btc:/bitcoind
-    network_mode: "host"
+    port:
+      - "38333:38333"
+      - "38332:38332"
     expose:
       - "38333"
       - "38332"
@@ -30,7 +34,8 @@ services:
     image: electrs_img
     volumes:
       - shared_vol_btc:/bitcoind
-    network_mode: "host"
+    port:
+      - "60601:60601"
     expose:
       - "60601"
 
@@ -39,7 +44,8 @@ services:
     build:
       context: nginx
     image: nginx_img
-    network_mode: "host"
+    port:
+      - "60602:60602"
     expose:
       - "60602"
 
@@ -50,7 +56,9 @@ services:
     image: core_lightning
     volumes:
       - shared_vol_ln:/lightningd
-    network_mode: "host"
+    port:
+      - "39735:39735"
+      - "3092:3092
     expose:
       - "39735"
       - "3092"
@@ -60,7 +68,8 @@ services:
     build:
       context: faucet
     image: faucet_img
-    network_mode: "host"
+    port:
+      - "5000:5000"
     expose:
       - "5000"
 
@@ -71,7 +80,8 @@ services:
     image: lnbits_img
     volumes:
       - shared_vol_ln:/lightningd
-    network_mode: "host"
+    port:
+      - "7000:7000"
     expose:
       - "7000"
 
@@ -82,7 +92,8 @@ services:
     image: rtl_img
     volumes:
       - shared_vol_ln:/lightningd
-    network_mode: "host"
+    port:
+      - "3000:3000"
     expose:
       - "3000"
 
