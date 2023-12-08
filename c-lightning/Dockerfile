@@ -21,8 +21,12 @@ RUN pip3 install --upgrade pip && \
 FROM os-base as cln-install
 
 # Install nodejs
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - &&\
-    apt install -y nodejs
+RUN curl https://nodejs.org/dist/v20.10.0/node-v20.10.0-linux-x64.tar.xz | tar -xJv && \
+    cp -r node-v20.10.0-linux-x64/bin /usr/ && \
+    cp -r node-v20.10.0-linux-x64/include /usr/ && \
+    cp -r node-v20.10.0-linux-x64/lib /usr/ && \
+    cp -r node-v20.10.0-linux-x64/share /usr/ && \
+    rm -rf node-v20.10.0-linux-x64
 
 # Get bitcoin-cli
 # Install bitcoind
