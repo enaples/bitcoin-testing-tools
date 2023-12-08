@@ -6,16 +6,16 @@ subfolder="test/functional/test_framework"
 branch="master"
 
 # Set the default output directory to the current directory
-output_dir="/bitcoind/test/functional/test_framework"
+output_dir="/bitcoind"
 
 # parse command line options
 while getopts ":r:s:b:d:" opt; do
     case ${opt} in
         r ) repo="$OPTARG"
         ;;
-        s ) subfolder="$OPTARG"
-        ;;
         b ) branch="$OPTARG"
+        ;;
+        s ) subfolder="$OPTARG"
         ;;
         d ) output_dir="$OPTARG"
         ;;
@@ -31,28 +31,22 @@ while getopts ":r:s:b:d:" opt; do
 done
 shift $((OPTIND -1))
 
-# Create output directory if it doesn't exist
-if [ ! -d "$output_dir" ]; then
-    echo "Creating output directory: $output_dir"
-    mkdir -p "$output_dir"
-fi
-
 # Download all files in the subfolder
 download_files() {
-    curl -s "https://api.github.com/repos/$repo/contents/$1" |
+    curl -s "https://api.github.com/repos/$repo/contents/$3" |
     jq -r '.[] | select(.type == "dir").path' |
     while read dir; do
-        download_files "$dir" "$2/$1"
+        download_files "$dir" "$4"
     done
     
-    curl -s "https://api.github.com/repos/$repo/contents/$1" |
+    curl -s "https://api.github.com/repos/$repo/contents/$3" |
     jq -r '.[] | select(.type == "file").path' |
     while read path; do
-        filename=$(basename "$path")
         url="https://raw.githubusercontent.com/$repo/$branch/$path"
-        curl -L -o "$2/$filename" "$url"
+        mkdir -p "$4/$(dirname $path)"
+        curl -L -o "$4/$path" "$url"
     done
 }
 
 # Call the function to download all files in the subfolder
-download_files "$subfolder" "$output_dir"
+download_files "$repo" "$branch" "$subfolder" "$output_dir"
