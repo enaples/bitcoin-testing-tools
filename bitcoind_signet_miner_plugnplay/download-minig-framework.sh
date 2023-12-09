@@ -36,7 +36,7 @@ download_files() {
     curl -s "https://api.github.com/repos/$repo/contents/$3" |
     jq -r '.[] | select(.type == "dir").path' |
     while read dir; do
-        download_files "$dir" "$4"
+        download_files "$repo" "$branch" "$dir" "$4"
     done
     
     curl -s "https://api.github.com/repos/$repo/contents/$3" |
