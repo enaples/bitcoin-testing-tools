@@ -1,12 +1,16 @@
 ARG OS=ubuntu
-ARG OS_VER=focal
+ARG OS_VER=jammy
 FROM ${OS}:${OS_VER} as bitcoind-install
+
+# Set TimeZone
+ENV TIMEZONE=Europe/Rome
+RUN ln -snf /usr/share/zoneinfo/$TIMEZONE /etc/localtime && echo $TIMEZONE > /etc/timezone
 
 # Install dependencies
 RUN DEBIAN_FRONTEND=noninteractive \
     apt-get update -qq && apt-get install -y nano  \
     net-tools nmap bc gpg curl unzip jq bash-completion git \
-    python3 python3-pip python3-setuptools && \
+    python3-pip python3-setuptools && \
     pip install argparse requests cryptography pipreqs
 
 # Install bitcoind
@@ -29,10 +33,11 @@ ADD $GH_URL/contrib/completions/bash/bitcoin-tx.bash $BC/bitcoin-tx
 COPY bitcoind /data
 
 # Copy support scripts
+# TODO: download the mining framework alwais from a verified branch avoiding master due to code changes
 COPY download-minig-framework.sh /usr/local/bin
 RUN chmod +x /usr/local/bin/download-minig-framework.sh
-RUN download-minig-framework.sh -s "test/functional/test_framework" -d "/data/test/functional/test_framework"
-RUN download-minig-framework.sh -s "contrib/signet" -d "/data/contrib/signet"
+RUN download-minig-framework.sh -s "test/functional/test_framework" -d "/data"
+RUN download-minig-framework.sh -s "contrib/signet" -d "/data"
 RUN pipreqs /data/test/functional/test_framework
 RUN pip install -r /data/test/functional/test_framework/requirements.txt
 
