@@ -1,4 +1,5 @@
-ControlPort 9051
+ControlPort 0.0.0.0:9051
+SOCKSPort 0.0.0.0:9050
 CookieAuthentication 1
 HashedControlPassword 16:0842DCF8C7AADE0660D4017BA614594A4A13498B6253FEC0E7681224DD
 CookieAuthFileGroupReadable 1

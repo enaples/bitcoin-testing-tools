@@ -13,7 +13,7 @@ def index():
 
 @api.route('/faucet', methods=['GET'])
 def get_faucet():
-    url = "http://localhost:38332/"
+    url = "http://btc_sig_miner:38332/"
     auth = ("bitcoin", "bitcoin")
     headers = {"content-type": "text/plain;"}
 

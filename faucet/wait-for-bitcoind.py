@@ -3,7 +3,7 @@ import requests
 from app import api
 
 print("Waiting for bitcoind to be fund...")
-url = "http://localhost:38332/"
+url = "http://btc_sig_miner:38332/"
 auth = ("bitcoin", "bitcoin")
 headers = {"content-type": "text/plain;"}
 

@@ -36,7 +36,7 @@ else
         \"fiatConversion\": true,
         \"currencyUnit\": \"EUR\",
         \"logLevel\": \"ERROR\",
-        \"lnServerUrl\": \"http://127.0.0.1:3092\",
+        \"lnServerUrl\": \"http://c-lightning:3092\",
         \"enableOffers\": true
       }
     }
