@@ -1,15 +1,21 @@
 #!/bin/bash
 set -Eeuo pipefail
 
+if [ -z "${BTC_HOST}" ]; then
+    BTC_HOST="localhost"
+fi
+
+echo "BTC_HOST is set to: ${BTC_HOST}"
+
 echo Waiting for bitcoind to start...
-until curl --silent --user bitcoin:bitcoin --data-binary '{"jsonrpc": "1.0", "id": "lnbits", "method": "getblockchaininfo", "params": []}' -H 'content-type: text/plain;' http://btc_sig_miner:38332/ | jq -e ".result.blocks > 100" > /dev/null 2>&1
+until curl --silent --user bitcoin:bitcoin --data-binary '{"jsonrpc": "1.0", "id": "lnbits", "method": "getblockchaininfo", "params": []}' -H 'content-type: text/plain;' http://$BTC_HOST:38332/ | jq -e ".result.blocks > 100" > /dev/null 2>&1
 do
     echo -n "."
     sleep 1
 done
 
 echo Waiting for bitcoind to be fund...
-until curl --silent --user bitcoin:bitcoin --data-binary '{"jsonrpc": "1.0", "id": "lnbits", "method": "getbalance", "params": ["*", 1]}' -H 'content-type: text/plain;' http://btc_sig_miner:38332/ | jq -e ".result > 0" > /dev/null 2>&1
+until curl --silent --user bitcoin:bitcoin --data-binary '{"jsonrpc": "1.0", "id": "lnbits", "method": "getbalance", "params": ["*", 1]}' -H 'content-type: text/plain;' http://$BTC_HOST:38332/ | jq -e ".result > 0" > /dev/null 2>&1
 do
     echo -n "."
     sleep 1
