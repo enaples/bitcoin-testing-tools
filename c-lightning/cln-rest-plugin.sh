@@ -9,6 +9,7 @@ mkdir -p /lightningd/cln-plugins \
 && tar xvf v${CLN_REST_VER}.tar.gz \
 && rm v${CLN_REST_VER}.tar.gz \
 && cd c-lightning-REST-${CLN_REST_VER} \
+&& npm cache clean --force \
 && npm install \
 && echo "{
   \"PORT\": $CLN_PORT,

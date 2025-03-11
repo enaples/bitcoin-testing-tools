@@ -2,7 +2,7 @@ cat <<- EOF > "/lightningd/config"
 network=signet
 bitcoin-rpcuser=bitcoin
 bitcoin-rpcpassword=bitcoin
-bitcoin-rpcconnect=btc_sig_miner
+bitcoin-rpcconnect=$BTC_HOST
 bitcoin-rpcport=38332
 
 log-level=debug
