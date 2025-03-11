@@ -1,5 +1,4 @@
-version: "3.3"
-networks: {}
+version: "3"
 
 services:
   tor:
@@ -8,11 +7,8 @@ services:
       context: tor
     image: tor_img
     ports:
-      - "9050:9050"
-      - "9051:9051"
-    expose:
-      - "9050"
-      - "9051"
+      - 9050:9050
+      - 9051:9051
 
   btc_sig_miner:
     container_name: btc_sig_miner
@@ -21,16 +17,8 @@ services:
     image: bitcoind_signet_miner
     volumes:
       - shared_vol_btc:/bitcoind
-    links:
-      - tor
     depends_on:
       - tor
-    ports:
-      - "38333:38333"
-      - "38332:38332"
-    expose:
-      - "38333"
-      - "38332"
 
   electrs:
     container_name: electrs
@@ -39,24 +27,14 @@ services:
     image: electrs_img
     volumes:
       - shared_vol_btc:/bitcoind
-    links:
-      - btc_sig_miner
     depends_on:
       - btc_sig_miner
-    ports:
-      - "60601:60601"
-    expose:
-      - "60601"
 
   nginx:
     container_name: nginx
     build:
       context: nginx
     image: nginx_img
-    ports:
-      - "60602:60602"
-    expose:
-      - "60602"
 
   c-lightning:
     container_name: c-lightning
@@ -65,48 +43,36 @@ services:
     image: core_lightning
     volumes:
       - shared_vol_ln:/lightningd
-    links:
-      - btc_sig_miner
-      - tor
+    environment:
+      - BTC_HOST=btc_sig_miner
     depends_on:
       - btc_sig_miner
       - tor
-    ports:
-      - "39735:39735"
-      - "3092:3092"
-    expose:
-      - "39735"
-      - "3092"
 
   faucet:
     container_name: faucet
     build:
       context: faucet
     image: faucet_img
-    links:
-      - btc_sig_miner
-      - tor
+    environment:
+      - BTC_HOST=btc_sig_miner
     depends_on:
       - btc_sig_miner
       - tor
     ports:
-      - "5000:5000"
-    expose:
-      - "5000"
+      - 5000:5000
 
   lnbits:
     container_name: lnbits
     build:
       context: lnbits
     image: lnbits_img
+    environment:
+      - BTC_HOST=btc_sig_miner
     volumes:
       - shared_vol_ln:/lightningd
-    links:
-      - c-lightning
     ports:
       - "7000:7000"
-    expose:
-      - "7000"
 
   rtl:
     container_name: rtl
@@ -115,13 +81,15 @@ services:
     image: rtl_img
     volumes:
       - shared_vol_ln:/lightningd
-    links:
-      - c-lightning
+    environment:
+      - BTC_HOST=btc_sig_miner
+      - CLN_HOST=c-lightning
     ports:
       - "3000:3000"
-    expose:
-      - "3000"
 
 volumes:
   shared_vol_btc:
   shared_vol_ln:
+
+networks:
+  btc-testing-tools:
