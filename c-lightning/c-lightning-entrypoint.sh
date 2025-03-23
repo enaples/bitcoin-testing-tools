@@ -11,20 +11,6 @@ source /usr/local/bin/create-config.sh
 #     # If not is assumed that the config is already in /lightningd
 # fi
 
-# Install plugins first if not already installed
-CLN_REST=false
-while read -r line; do
-    # Check line by line
-    if [[ "$line" == *"# cln-rest-plugin"* ]]; then
-        echo "'cln-rest-plugin' already present in config"
-        CLN_REST=true
-    fi
-done <"/lightningd/config"
-
-if [ "$CLN_REST" = false ]; then
-    echo "Installing 'cln-rest-plugin'..."
-    source /usr/local/bin/cln-rest-plugin.sh
-fi
 
 # Wait for bitcoind to be ready
 source /usr/local/bin/wait-for-bitcoind.sh
@@ -37,20 +23,6 @@ until lightning-cli --lightning-dir=/lightningd getinfo >/dev/null 2>&1; do
 done
 echo "Startup complete"
 sleep 2
-
-if [ -f "/lightnigd/access.macaroon" ]; then
-    # If the file exists, check if the magic string is the same
-    echo "'access.macaroon': $(xxd -ps -u -c 1000 /lightningd/access.macaroon)"
-else
-    # If the file doesn't exist, move it from c-lightning-REST
-    if [ -f "/lightningd/cln-plugins/c-lightning-REST-${CLN_REST_VER}/certs/access.macaroon" ]; then
-        cp /lightningd/cln-plugins/c-lightning-REST-${CLN_REST_VER}/certs/access.macaroon /root/access.macaroon
-        cp /lightningd/cln-plugins/c-lightning-REST-${CLN_REST_VER}/certs/access.macaroon /lightningd/access.macaroon
-    else
-        echo "Macaroon not found."
-    fi
-
-fi
 
 if [[ $(lightning-cli --lightning-dir=/lightningd listfunds | jq -r ".outputs" | jq "length <= 0") == "true" ]]; then
     echo "Funding c-lightning wallet"
