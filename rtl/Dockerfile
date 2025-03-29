@@ -7,8 +7,9 @@ RUN apt-get update && apt-get install -y git nano curl gpg jq
 RUN curl https://keybase.io/suheb/pgp_keys.asc | gpg --import
 RUN git clone --depth=1 --branch v${RTL_VER} https://github.com/Ride-The-Lightning/RTL.git
 
-ENV CLN_HOST="c-lightning"
-ENV BTC_HOST="btc_sig_miner"
+ENV CLN_REST_HOST="localhost"
+ENV CLN_REST_PORT=3092
+ENV BTC_HOST="localhost"
 COPY rtl-entrypoint.sh /RTL
 RUN chmod +x /RTL/rtl-entrypoint.sh
 COPY wait-for-bitcoind.sh /RTL

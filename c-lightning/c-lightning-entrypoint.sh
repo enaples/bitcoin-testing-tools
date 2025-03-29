@@ -5,11 +5,11 @@ set -Eeuo pipefail
 source /usr/local/bin/create-config.sh
 
 # Move conf to /lightningd
-# if [ -f "/data/config" ]; then
-#     mv /data/config /lightningd/config
-#     ln -s /lightningd /root/.lightning
-#     # If not is assumed that the config is already in /lightningd
-# fi
+if [ -f "/data/config" ]; then
+    mv /data/config /lightningd/config
+    ln -s /lightningd /root/.lightning
+    # If not is assumed that the config is already in /lightningd
+fi
 
 
 # Wait for bitcoind to be ready

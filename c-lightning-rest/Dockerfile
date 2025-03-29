@@ -2,12 +2,11 @@ FROM node:20
 
 # c-lightning-REST parameters
 ENV CLN_REST_VER="0.10.5"
-ENV CLN_PORT=3092
-ENV CLN_DOCPORT=4091
+ENV CLN_REST_PORT=3092
+ENV CLN_REST_DOCPORT=4091
 
 # Hosts
 ENV BTC_HOST="btc_sig_miner"
-ENV CLN_HOST="c-lightning"
 
 RUN apt update && curl https://keybase.io/suheb/pgp_keys.asc | gpg --import && \
     apt install -y jq && \
@@ -22,9 +21,13 @@ COPY c-lightning-rest-entrypoint.sh /c-lightning-REST
 RUN chmod +x /c-lightning-REST/c-lightning-rest-entrypoint.sh
 COPY wait-for-bitcoind.sh /c-lightning-REST
 RUN chmod +x /c-lightning-REST/wait-for-bitcoind.sh
+COPY copy-macaroon.sh /c-lightning-REST
+RUN chmod +x /c-lightning-REST/copy-macaroon.sh
 
-EXPOSE $CLN_PORT
+EXPOSE $CLN_REST_PORT
 
 ENTRYPOINT ["/c-lightning-REST/c-lightning-rest-entrypoint.sh"]
 
-CMD ["node",  "cl-rest.js"]
+CMD ["node", "cl-rest.js"]
+
+# Copiare l'access.macaroon

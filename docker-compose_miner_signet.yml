@@ -5,7 +5,7 @@ services:
     container_name: tor
     build:
       context: tor
-    image: tor_img
+    image: tor
     ports:
       - 9050:9050
       - 9051:9051
@@ -15,6 +15,8 @@ services:
     build:
       context: bitcoind_signet_miner_plugnplay
     image: bitcoind_signet_miner
+    environment:
+      - BLOCK_MINING_SEC=120
     volumes:
       - shared_vol_btc:/bitcoind
     depends_on:
@@ -24,7 +26,7 @@ services:
     container_name: electrs
     build:
       context: electrs
-    image: electrs_img
+    image: electrs
     volumes:
       - shared_vol_btc:/bitcoind
     depends_on:
@@ -35,12 +37,14 @@ services:
     build:
       context: nginx
     image: nginx_img
+    ports:
+      - 60602:60602
 
   c-lightning:
     container_name: c-lightning
     build:
       context: c-lightning
-    image: core_lightning
+    image: c-lightning
     volumes:
       - shared_vol_ln:/lightningd
     environment:
@@ -59,6 +63,7 @@ services:
     environment:
       - BTC_HOST=btc_sig_miner
       - CLN_HOST=c-lightning
+    command: /c-lightning-REST/copy-macaroon.sh
     depends_on:
       - c-lightning
       - btc_sig_miner
@@ -68,7 +73,7 @@ services:
     container_name: faucet
     build:
       context: faucet
-    image: faucet_img
+    image: faucet
     environment:
       - BTC_HOST=btc_sig_miner
     depends_on:
@@ -93,12 +98,12 @@ services:
     container_name: rtl
     build:
       context: rtl
-    image: rtl_img
+    image: rtl
     volumes:
       - shared_vol_ln:/lightningd
     environment:
       - BTC_HOST=btc_sig_miner
-      - CLN_HOST=c-lightning
+      - CLN_REST_HOST=c-lightning-rest
     ports:
       - "3000:3000"
 

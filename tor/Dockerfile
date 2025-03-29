@@ -6,8 +6,7 @@ FROM ${OS}:${OS_VER} as os-base
 
 # Install dependencies
 RUN DEBIAN_FRONTEND=noninteractive \
-    apt-get update -qq && apt-get install -qq -y \
-    apt-transport-https wget gpg
+    apt-get update -qq && apt-get install -qq -y apt-transport-https wget gpg dnsutils
 
 COPY tor.list /etc/apt/sources.list.d
 
@@ -18,7 +17,8 @@ FROM os-base as tor-service
 
 # Install Tor
 RUN apt-get update && apt-get install -qq -y tor deb.torproject.org-keyring
-COPY torrc /etc/tor
+COPY create-config.sh /usr/local/bin
+RUN chmod +x /usr/local/bin/create-config.sh
 
 RUN usermod -a -G debian-tor root
 
