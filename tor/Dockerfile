@@ -6,7 +6,7 @@ FROM ${OS}:${OS_VER} as os-base
 
 # Install dependencies
 RUN DEBIAN_FRONTEND=noninteractive \
-    apt-get update -qq && apt-get install -qq -y apt-transport-https wget gpg dnsutils
+    apt-get update -qq && apt-get install -qq -y apt-transport-https wget gpg
 
 COPY tor.list /etc/apt/sources.list.d
 
