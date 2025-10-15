@@ -32,6 +32,53 @@ services:
     depends_on:
       - btc_sig_miner
 
+  ### Mempool
+  web:
+    container_name: mempool_web
+    image: mempool/frontend:latest
+    environment:
+      FRONTEND_HTTP_PORT: "8080"
+      BACKEND_MAINNET_HTTP_HOST: "api"
+    user: "1000:1000"
+    restart: on-failure
+    stop_grace_period: 1m
+    command: "./wait-for db:3306 --timeout=720 -- nginx -g 'daemon off;'"
+    ports:
+      - 80:8080
+  api:
+    container_name: mempool_api
+    image: mempool/backend:latest
+    environment:
+      NETWORK: "signet"
+      MEMPOOL_BACKEND: "electrum"
+      ELECTRUM_HOST: "electrs"
+      ELECTRUM_PORT: 60601
+      ELECTRUM_TLS_ENABLED: "false"
+      DATABASE_HOST: "mempool_db"
+      DATABASE_DATABASE: "mempool"
+      DATABASE_USERNAME: "mempool"
+      DATABASE_PASSWORD: "mempool"
+      STATISTICS_ENABLED: "true"
+    user: "1000:1000"
+    restart: on-failure
+    stop_grace_period: 1m
+    command: "./wait-for-it.sh db:3306 --timeout=720 --strict -- ./start.sh"
+    volumes:
+      - ./mempool/data:/backend/cache
+  db:
+    container_name: mempool_db
+    environment:
+      MYSQL_DATABASE: "mempool"
+      MYSQL_USER: "mempool"
+      MYSQL_PASSWORD: "mempool"
+      MYSQL_ROOT_PASSWORD: "admin"
+    image: mariadb:10.5.21
+    user: "1000:1000"
+    restart: on-failure
+    stop_grace_period: 1m
+    volumes:
+      - ./mempool/mysql/data:/var/lib/mysql  
+
   nginx:
     container_name: nginx
     build:
