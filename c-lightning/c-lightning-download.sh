@@ -26,7 +26,11 @@ case $architecture in
         
         echo "alias lightning-cli=\"lightning-cli --lightning-dir=/lightningd\"
         [[ \$PS1 && -f /usr/share/bash-completion/bash_completion ]] && \\
-        . /usr/share/bash-completion/bash_completion" > "/root/.bashrc"
+        . /usr/share/bash-completion/bash_completion" >> "/root/.bashrc"
+        . /usr/share/bash-completion/bash_completion
+        EOF
+
+        source /root/.bashrc
         
     ;;
     aarch64)
@@ -43,7 +47,8 @@ case $architecture in
         
         echo "alias lightning-cli=\"lightning-cli --lightning-dir=/lightningd\"
         [[ \$PS1 && -f /usr/share/bash-completion/bash_completion ]] && \\
-        . /usr/share/bash-completion/bash_completion" > "/root/.bashrc"
-        
+        . /usr/share/bash-completion/bash_completion" >> "/root/.bashrc"
+
+        source /root/.bashrc
     ;;
 esac

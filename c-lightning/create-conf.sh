@@ -14,5 +14,5 @@ autocleaninvoice-expired-by=86400
 tor-service-password=bitcoin
 proxy=tor:9050
 bind-addr=0.0.0.0:$CL_PORT
-addr=statictor:tor:9051/torport=$CL_PORT
+addr=autotor:tor:9051/torport=$CL_PORT
 EOF
