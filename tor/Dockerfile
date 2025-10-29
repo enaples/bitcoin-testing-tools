@@ -17,8 +17,8 @@ FROM os-base as tor-service
 
 # Install Tor
 RUN apt-get update && apt-get install -qq -y tor deb.torproject.org-keyring
-COPY create-config.sh /usr/local/bin
-RUN chmod +x /usr/local/bin/create-config.sh
+COPY create-conf.sh /usr/local/bin
+RUN chmod +x /usr/local/bin/create-conf.sh
 
 RUN usermod -a -G debian-tor root
 

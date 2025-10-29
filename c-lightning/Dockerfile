@@ -39,8 +39,8 @@ ADD https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/l
 # COPY lightningd /data
 COPY c-lightning-entrypoint.sh /usr/local/bin
 RUN chmod +x /usr/local/bin/c-lightning-entrypoint.sh
-COPY create-config.sh /usr/local/bin
-RUN chmod +x /usr/local/bin/create-config.sh
+COPY create-conf.sh /usr/local/bin
+RUN chmod +x /usr/local/bin/create-conf.sh
 COPY fund-c-lightning.sh /usr/local/bin
 RUN chmod +x /usr/local/bin/fund-c-lightning.sh
 COPY logtail.sh /usr/local/bin
