@@ -17,12 +17,17 @@ FROM os-base as tor-service
 
 # Install Tor
 RUN apt-get update && apt-get install -qq -y tor deb.torproject.org-keyring
+RUN apt-get install -y dnsutils
 COPY create-conf.sh /usr/local/bin
 RUN chmod +x /usr/local/bin/create-conf.sh
+COPY tor-entrypoint.sh /usr/local/bin/tor-entrypoint.sh
+RUN chmod +x /usr/local/bin/tor-entrypoint.sh
 
 RUN usermod -a -G debian-tor root
 
 EXPOSE 9050 9051
 
 WORKDIR /root
+
+ENTRYPOINT ["/usr/local/bin/tor-entrypoint.sh"]
 CMD ["tor"]

@@ -101,22 +101,6 @@ services:
       - btc_sig_miner
       - tor
 
-  c-lightning-rest:
-    container_name: c-lightning-rest
-    build:
-      context: c-lightning-rest
-    image: c-lightning-rest
-    volumes:
-      - shared_vol_ln:/lightningd
-    environment:
-      - BTC_HOST=btc_sig_miner
-      - CLN_HOST=c-lightning
-    command: /c-lightning-REST/copy-macaroon.sh
-    depends_on:
-      - c-lightning
-      - btc_sig_miner
-      - tor
-
   faucet:
     container_name: faucet
     build:
