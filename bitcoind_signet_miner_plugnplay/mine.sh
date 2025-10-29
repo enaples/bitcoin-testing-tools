@@ -25,7 +25,13 @@ do
         echo $NBITS > /bitcoind/nbits_calibration.txt
     fi
     
-    $MINER --cli="$CLI" generate --grind-cmd="$GRIND" --nbits=$NBITS --descriptor=$MINING_DESC --poisson --ongoing
+    if [ "$POISSON" = true ] ; then
+        echo "Mining with Poisson distribution..."
+        $MINER --cli="$CLI" generate --grind-cmd="$GRIND" --nbits=$NBITS --descriptor=$MINING_DESC --poisson --ongoing
+    else
+        echo "Mining with fixed interval..."
+        $MINER --cli="$CLI" generate --grind-cmd="$GRIND" --nbits=$NBITS --descriptor=$MINING_DESC --ongoing
+    fi
 done
 
 # If loop is interrupted, stop bitcoind

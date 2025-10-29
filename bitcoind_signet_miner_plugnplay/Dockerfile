@@ -16,6 +16,7 @@ RUN DEBIAN_FRONTEND=noninteractive \
 # Install bitcoind
 ENV BITCOIND_VER="24.0.1"
 ENV BLOCK_MINING_SEC=600
+ENV POISSON=true
 COPY bitcoind-download.sh /usr/local/bin
 RUN chmod +x /usr/local/bin/bitcoind-download.sh
 RUN bitcoind-download.sh
