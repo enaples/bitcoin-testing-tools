@@ -9,8 +9,6 @@ clnrest-port=3010
 
 log-level=debug
 log-file=/lightningd/lightningd.log
-autocleaninvoice-cycle=86400
-autocleaninvoice-expired-by=86400
 
 # network
 tor-service-password=bitcoin

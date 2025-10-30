@@ -2,7 +2,7 @@
 set -Eeuo pipefail
 
 # Create config file
-source /usr/local/bin/create-config.sh
+source /usr/local/bin/create-conf.sh
 
 # Move conf to /lightningd
 if [ -f "/data/config" ]; then

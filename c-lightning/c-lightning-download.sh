@@ -13,7 +13,7 @@ architecture=$(uname -m)
 # Check the architecture and print the corresponding message
 case $architecture in
     x86_64)
-        CL_FILE=clightning-v${CL_VER}-Ubuntu-20.04.tar.xz
+        CL_FILE=clightning-v${CL_VER}-Ubuntu-20.04-amd64.tar.xz 
         echo "Installing Core-Lightning ${CL_VER} for x86_64"
         cd /tmp && \
         curl -# -sLO https://github.com/ElementsProject/lightning/releases/download/v${CL_VER}/${CL_FILE}
