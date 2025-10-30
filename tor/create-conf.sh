@@ -9,9 +9,9 @@ HiddenServiceDir /var/lib/tor/hidden_service_electrs/
 HiddenServiceVersion 3
 HiddenServicePort 60602 $(nslookup nginx | awk '/^Address: / { print $2 }'):60602
 # cl-rest
-# HiddenServiceDir /var/lib/tor/hidden_service_cl_rest/
-# HiddenServiceVersion 3
-# HiddenServicePort 8080 $(nslookup c-lightning | awk '/^Address: / { print $2 }'):3010
+HiddenServiceDir /var/lib/tor/hidden_service_cl_rest/
+HiddenServiceVersion 3
+HiddenServicePort 8080 $(nslookup c-lightning | awk '/^Address: / { print $2 }'):3010
 # Faucet
 HiddenServiceDir /var/lib/tor/hidden_service_faucet/
 HiddenServiceVersion 3
