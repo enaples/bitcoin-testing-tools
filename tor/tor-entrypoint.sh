@@ -1,8 +1,7 @@
 #!/bin/bash
 set -Eeuo pipefail
 
-# Give time for the other services to start
-sleep 3
+source /usr/local/bin/wait-for-bitcoind.sh
 
 source /usr/local/bin/create-conf.sh
 

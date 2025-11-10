@@ -6,7 +6,7 @@ FROM ${OS}:${OS_VER} as os-base
 
 # Install dependencies
 RUN DEBIAN_FRONTEND=noninteractive \
-    apt-get update -qq && apt-get install -qq -y apt-transport-https wget gpg
+    apt-get update -qq && apt-get install -qq -y apt-transport-https wget gpg jq curl
 
 COPY tor.list /etc/apt/sources.list.d
 
@@ -22,6 +22,8 @@ COPY create-conf.sh /usr/local/bin
 RUN chmod +x /usr/local/bin/create-conf.sh
 COPY tor-entrypoint.sh /usr/local/bin/tor-entrypoint.sh
 RUN chmod +x /usr/local/bin/tor-entrypoint.sh
+COPY wait-for-bitcoind.sh /usr/local/bin
+RUN chmod +x /usr/local/bin/wait-for-bitcoind.sh
 
 RUN usermod -a -G debian-tor root
 
