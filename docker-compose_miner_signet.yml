@@ -50,8 +50,8 @@ services:
     environment:
       MEMPOOL_NETWORK: "signet"
       MEMPOOL_BACKEND: "electrum"
-      ELECTRUM_HOST: "nginx"
-      ELECTRUM_PORT: 60602
+      ELECTRUM_HOST: "electrs"
+      ELECTRUM_PORT: 60601
       ELECTRUM_TLS_ENABLED: "true"
       DATABASE_HOST: "mempool_db"
       DATABASE_DATABASE: "mempool"
@@ -88,8 +88,8 @@ services:
     ports:
       - 60602:60602
 
-  c-lightning:
-    container_name: c-lightning
+  cln:
+    container_name: cln
     build:
       context: c-lightning
     image: c-lightning
@@ -147,3 +147,4 @@ volumes:
 
 networks:
   btc-testing-tools:
+    driver: bridge
