@@ -5,7 +5,8 @@ bitcoin-rpcpassword=bitcoin
 bitcoin-rpcconnect=$BTC_HOST
 bitcoin-rpcport=38332
 
-clnrest-port=3010
+# Newr version only
+#clnrest-port=3010
 
 log-level=debug
 log-file=/lightningd/lightningd.log
