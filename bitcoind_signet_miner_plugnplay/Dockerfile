@@ -34,7 +34,7 @@ ADD $GH_URL/contrib/completions/bash/bitcoin-tx.bash $BC/bitcoin-tx
 COPY bitcoind /data
 
 # Copy support scripts
-# TODO: download the mining framework alwais from a verified branch avoiding master due to code changes
+# TODO: download the mining framework always from a verified branch avoiding master due to code changes
 COPY download-minig-framework.sh /usr/local/bin
 RUN chmod +x /usr/local/bin/download-minig-framework.sh
 RUN download-minig-framework.sh -s "test/functional/test_framework" -d "/data"
