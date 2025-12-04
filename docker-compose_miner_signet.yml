@@ -114,30 +114,30 @@ services:
     ports:
       - 5000:5000
 
-  lnbits:
-    container_name: lnbits
-    build:
-      context: lnbits
-    image: lnbits_img
-    environment:
-      - BTC_HOST=btc_sig_miner
-    volumes:
-      - shared_vol_ln:/lightningd
-    ports:
-      - "7000:7000"
+  # lnbits:
+  #   container_name: lnbits
+  #   build:
+  #     context: lnbits
+  #   image: lnbits_img
+  #   environment:
+  #     - BTC_HOST=btc_sig_miner
+  #   volumes:
+  #     - shared_vol_ln:/lightningd
+  #   ports:
+  #     - "7000:7000"
 
-  rtl:
-    container_name: rtl
-    build:
-      context: rtl
-    image: rtl
-    volumes:
-      - shared_vol_ln:/lightningd
-    environment:
-      - BTC_HOST=btc_sig_miner
-      - CLN_REST_HOST=c-lightning-rest
-    ports:
-      - "3000:3000"
+  # rtl:
+  #   container_name: rtl
+  #   build:
+  #     context: rtl
+  #   image: rtl
+  #   volumes:
+  #     - shared_vol_ln:/lightningd
+  #   environment:
+  #     - BTC_HOST=btc_sig_miner
+  #     - CLN_REST_HOST=c-lightning-rest
+  #   ports:
+  #     - "3000:3000"
 
 volumes:
   shared_vol_btc:

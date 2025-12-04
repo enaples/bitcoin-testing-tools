@@ -1,11 +1,5 @@
 #!/bin/bash
-
-# Import signing keys
-# Ref. https://docs.corelightning.org/docs/security-policy
-gpg --keyserver hkps://keys.openpgp.org --recv-keys "15EE 8D6C AB0E 7F0C F999 BFCB D920 0E6C D1AD B8F1" # Rusty Russell
-gpg --keyserver hkps://keys.openpgp.org --recv-keys "B731 AAC5 21B0 1385 9313 F674 A26D 6D9F E088 ED58" # Christian Decker
-gpg --keyserver hkps://keys.openpgp.org --recv-keys "30DE 693A E0DE 9E37 B3E7 EB6B BFF0 F678 10C1 EED1" # Lisa Neigut
-gpg --keyserver hkps://keys.openpgp.org --recv-keys "0437 4E42 789B BBA9 462E 4767 F3BF 63F2 7474 36AB" # Alex Myers
+/usr/local/bin/import-keys.sh
 
 # Get the machine architecture
 architecture=$(uname -m)
@@ -27,10 +21,6 @@ case $architecture in
         echo "alias lightning-cli=\"lightning-cli --lightning-dir=/lightningd\"
         [[ \$PS1 && -f /usr/share/bash-completion/bash_completion ]] && \\
         . /usr/share/bash-completion/bash_completion" >> "/root/.bashrc"
-        . /usr/share/bash-completion/bash_completion
-        EOF
-
-        source /root/.bashrc
         
     ;;
     aarch64)
@@ -49,6 +39,5 @@ case $architecture in
         [[ \$PS1 && -f /usr/share/bash-completion/bash_completion ]] && \\
         . /usr/share/bash-completion/bash_completion" >> "/root/.bashrc"
 
-        source /root/.bashrc
     ;;
 esac

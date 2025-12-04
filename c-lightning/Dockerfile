@@ -1,6 +1,6 @@
 ARG OS=ubuntu
 ARG OS_VER=focal
-FROM ${OS}:${OS_VER} as os-base
+FROM ${OS}:${OS_VER} AS os-base
 
 # Set TimeZone
 ENV TIMEZONE=Europe/Rome
@@ -18,7 +18,7 @@ RUN pip3 install --upgrade pip && \
     pip3 install mako && \
     pip3 install --user poetry
 
-FROM os-base as cln-install
+FROM os-base AS cln-install
 
 # Get bitcoin-cli
 # Install bitcoind
@@ -28,10 +28,12 @@ RUN chmod +x /usr/local/bin/bitcoind-download.sh
 RUN bitcoind-download.sh
 
 # Install c-lightning
-ENV CL_VER="25.09.1"
+ENV CL_VER="23.02"
 ENV CL_PORT=39735
 COPY c-lightning-download.sh /usr/local/bin
 RUN chmod +x /usr/local/bin/c-lightning-download.sh
+COPY import-keys.sh /usr/local/bin
+RUN chmod +x /usr/local/bin/import-keys.sh
 RUN c-lightning-download.sh
 
 ADD https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/lightning-cli.bash-completion /usr/share/bash-completion/completions/lightning-cli
