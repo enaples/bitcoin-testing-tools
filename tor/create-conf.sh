@@ -24,7 +24,7 @@ EOF
 }
 
 # Add hidden services only if nslookup succeeds
-add_hidden_service "nginx" "hidden_service_electrs" "60603" "60603"
+add_hidden_service "nginx" "hidden_service_electrs" "60602" "60602"
 add_hidden_service "cln" "hidden_service_cl_rest" "8080" "3010"
 add_hidden_service "faucet" "hidden_service_faucet" "5050" "5000"
 add_hidden_service "lnbits" "hidden_service_lnbits" "7070" "7000"

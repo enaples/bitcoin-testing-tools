@@ -2,8 +2,6 @@
 
 # Import GPG signing keys based on architecture
 
-set -e  # Exit on error
-
 # Get the machine architecture
 ARCHITECTURE=$(uname -m)
 
@@ -42,9 +40,9 @@ case "$ARCHITECTURE" in
         fi
         
         # Check if there are any .txt files in the directory
-        shopt -s nullglob
+        shopt -s nullglob dotglob
         KEY_FILES=("$KEYS_DIR"/*.txt)
-        shopt -u nullglob
+        shopt -u nullglob dotglob
         
         if [ ${#KEY_FILES[@]} -eq 0 ]; then
             echo "No .txt files found in '$KEYS_DIR'."
@@ -61,12 +59,19 @@ case "$ARCHITECTURE" in
         for key_file in "${KEY_FILES[@]}"; do
             echo "Importing: $(basename "$key_file")"
             
-            if gpg --import "$key_file" 2>&1; then
+            # GPG import can return non-zero exit codes for warnings, so we capture the output
+            if gpg --import "$key_file" 2>&1 | tee /tmp/gpg_output.txt | grep -q "imported: 1"; then
                 ((SUCCESS_COUNT++))
                 echo "✓ Successfully imported: $(basename "$key_file")"
             else
-                ((FAIL_COUNT++))
-                echo "✗ Failed to import: $(basename "$key_file")"
+                # Check if key was already imported
+                if grep -q "not changed" /tmp/gpg_output.txt; then
+                    ((SUCCESS_COUNT++))
+                    echo "✓ Already imported: $(basename "$key_file")"
+                else
+                    ((FAIL_COUNT++))
+                    echo "✗ Failed to import: $(basename "$key_file")"
+                fi
             fi
             echo "-----------------------------------"
         done
@@ -85,3 +90,4 @@ case "$ARCHITECTURE" in
 esac
 
 echo "GPG key import process finished."
+exit 0
