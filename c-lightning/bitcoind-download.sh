@@ -13,6 +13,10 @@ case $architecture in
         BITCOIN_FILE="bitcoin-${BITCOIND_VER}-aarch64-linux-gnu.tar.gz"
         echo "Installing Bitcoin Core ${BITCOIND_VER} for aarch64"
     ;;
+    arm64)
+        BITCOIN_FILE="bitcoin-${BITCOIND_VER}-arm64-apple-darwin.tar.gz"
+        echo "Installing Bitcoin Core ${BITCOIND_VER} for arm64"
+    ;;
 esac
 
 # Install Bitcoin Core binaries and libraries

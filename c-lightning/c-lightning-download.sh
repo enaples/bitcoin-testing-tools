@@ -23,7 +23,7 @@ case $architecture in
         . /usr/share/bash-completion/bash_completion" >> "/root/.bashrc"
         
     ;;
-    aarch64)
+    aarch64|arm64)
         echo "Executables not available for Core-Lightning ${CL_VER} for aarch64"
         echo "Compiling the source code..."
         
