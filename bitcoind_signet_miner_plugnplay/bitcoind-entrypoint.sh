@@ -1,7 +1,6 @@
 #!/bin/bash
 set -Eeuo pipefail
 
-WALLET="sig_miner_wallet"
 # Move bitcoin.conf to /bitcoind
 if [ -f "/data/bitcoin.conf" ]; then
     mv /data/bitcoin.conf /bitcoind/bitcoin.conf

@@ -8,13 +8,17 @@ architecture=$(uname -m)
 
 # Check the architecture and print the corresponding message
 case $architecture in
-  x86_64)
-    BITCOIN_FILE="bitcoin-${BITCOIND_VER}-x86_64-linux-gnu.tar.gz"
-    echo "Installing Bitcoin Core ${BITCOIND_VER} for x86_64"
+    x86_64)
+        BITCOIN_FILE="bitcoin-${BITCOIND_VER}-x86_64-linux-gnu.tar.gz"
+        echo "Installing Bitcoin Core ${BITCOIND_VER} for x86_64"
     ;;
-  aarch64)
-    BITCOIN_FILE="bitcoin-${BITCOIND_VER}-aarch64-linux-gnu.tar.gz"
-    echo "Installing Bitcoin Core ${BITCOIND_VER} for aarch64"
+    arm64)
+        BITCOIN_FILE="bitcoin-${BITCOIND_VER}-arm64-apple-darwin.tar.gz"
+        echo "Installing Bitcoin Core ${BITCOIND_VER} for arm64 "
+    ;;
+    aarch64)
+        BITCOIN_FILE="bitcoin-${BITCOIND_VER}-aarch64-linux-gnu.tar.gz"
+        echo "Installing Bitcoin Core ${BITCOIND_VER} for aarch64"
     ;;
 esac
 

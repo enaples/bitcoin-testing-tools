@@ -2,7 +2,7 @@
 set -Eeuo pipefail
 
 # Define mining constants
-CLI="bitcoin-cli -datadir=/bitcoind"
+CLI="bitcoin-cli -datadir=/bitcoind -rpcwallet=$WALLET"
 MINER="/data/contrib/signet/miner"
 GRIND="bitcoin-util grind"
 MINING_DESC=$(cli listdescriptors | jq -r ".descriptors | .[4].desc")

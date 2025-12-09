@@ -16,7 +16,8 @@ services:
       context: bitcoind_signet_miner_plugnplay
     image: bitcoind_signet_miner
     environment:
-      - BLOCK_MINING_SEC=120
+      - BLOCK_MINING_SEC=90
+      - POISSON=false
     volumes:
       - shared_vol_btc:/bitcoind
     depends_on:

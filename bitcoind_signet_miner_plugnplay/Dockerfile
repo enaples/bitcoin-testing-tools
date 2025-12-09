@@ -16,6 +16,7 @@ RUN DEBIAN_FRONTEND=noninteractive \
 # Install bitcoind
 ENV BITCOIND_VER="24.0.1"
 ENV BLOCK_MINING_SEC=600
+ENV WALLET="sig_miner_wallet"
 ENV POISSON=true
 COPY bitcoind-download.sh /usr/local/bin
 RUN chmod +x /usr/local/bin/bitcoind-download.sh
@@ -24,8 +25,8 @@ RUN bitcoind-download.sh
 # Install runtime scripts, bash-completion and configuration files
 
 # bash completion for bitcoind and bitcoin-cli
-ENV GH_URL https://raw.githubusercontent.com/bitcoin/bitcoin/master
-ENV BC /usr/share/bash-completion/completions
+ENV GH_URL=https://raw.githubusercontent.com/bitcoin/bitcoin/master
+ENV BC=/usr/share/bash-completion/completions
 ADD $GH_URL/contrib/completions/bash/bitcoin-cli.bash $BC/bitcoin-cli
 ADD $GH_URL/contrib/completions/bash/bitcoind.bash $BC/bitcoind
 ADD $GH_URL/contrib/completions/bash/bitcoin-tx.bash $BC/bitcoin-tx

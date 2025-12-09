@@ -38,7 +38,7 @@ RUN chmod +x /usr/local/bin/cli
 
 # bitcoind P2P
 EXPOSE 38333/tcp
-# bitcoind regtest RPC
+# bitcoind signet RPC
 EXPOSE 38332/tcp
 # zmqpubrawblock
 EXPOSE 28332/tcp
