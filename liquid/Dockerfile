@@ -16,8 +16,8 @@ FROM os-base AS elements-install
 
 # Install c-lightning
 ENV ELEMENTSD_VER="23.3.1"
+ENV ELEMENTS_NETWORK="liquidsignet"
 ENV ELEMENTS_RPCPORT=38884
-ENV ELEMENTS_NETWORK="regtest"
 ENV ELEMENTS_PORT=38886
 COPY elementsd-download.sh /usr/local/bin
 RUN chmod +x /usr/local/bin/elementsd-download.sh

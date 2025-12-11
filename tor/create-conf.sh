@@ -13,18 +13,17 @@ add_hidden_service() {
     local service_port=$3
     local target_port=$4
     
-    if ip_address=$(nslookup "$service_name" 2>/dev/null | awk '/^Address: / { print $2; exit }') && [ -n "$ip_address" ]; then
         cat <<- EOF >> /etc/tor/torrc
 # $service_name
 HiddenServiceDir /var/lib/tor/$service_dir/
 HiddenServiceVersion 3
-HiddenServicePort $service_port $ip_address:$target_port
+HiddenServicePort $service_port $service_name:$target_port
 EOF
-    fi
 }
 
 # Add hidden services only if nslookup succeeds
 add_hidden_service "nginx" "hidden_service_electrs" "60602" "60602"
 add_hidden_service "cln" "hidden_service_cl_rest" "8080" "3010"
 add_hidden_service "faucet" "hidden_service_faucet" "5050" "5000"
-add_hidden_service "lnbits" "hidden_service_lnbits" "7070" "7000"
+# add_hidden_service "lnbits" "hidden_service_lnbits" "7070" "7000"
+add_hidden_service "mempool_web" "hidden_service_mempool" "80" "8080"
