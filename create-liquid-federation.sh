@@ -71,13 +71,16 @@ echo "Step 2: Launching 5 Liquid nodes..."
 for i in $(seq 1 $NUM_NODES); do
     CONTAINER_NAME="liquid$i"
     VOLUME_NAME="bitcoin-testing-tools_shared_vol_liquid$i"
-    RPC_PORT=$((BASE_RPC_PORT + i - 1))
-    P2P_PORT=$((BASE_P2P_PORT + i - 1))
+    RPC_PORT=$((BASE_RPC_PORT + i + 1000 * (i - 1)))
+    P2P_PORT=$((BASE_P2P_PORT + i + 1000 * (i - 1)))
     
     echo "  Starting $CONTAINER_NAME (RPC: $RPC_PORT, P2P: $P2P_PORT)..."
     
     # Remove container if it exists
     docker rm -f $CONTAINER_NAME 2>/dev/null || true
+
+    # Remvoe volume if it exists
+    docker volume rm -f $VOLUME_NAME
     
     docker run -d \
         --name $CONTAINER_NAME \
@@ -104,8 +107,9 @@ declare -a PUBKEYS
 for i in $(seq 1 $NUM_NODES); do
     CONTAINER_NAME="liquid$i"
     
+    # Wallet must be legacy otherwise the signblock RPC won't work
     echo "  Creating wallet on $CONTAINER_NAME..."
-    docker exec $CONTAINER_NAME elements-cli -conf=/elementsd/elements.conf -named createwallet wallet_name=federated descriptors=true
+    docker exec $CONTAINER_NAME elements-cli -conf=/elementsd/elements.conf createwallet federated
     
     echo "  Generating address and extracting pubkey..."
     ADDR=$(docker exec $CONTAINER_NAME elements-cli -conf=/elementsd/elements.conf getnewaddress)
@@ -122,8 +126,9 @@ echo "Step 4: Dumping private keys..."
 for i in $(seq 1 $NUM_NODES); do
     CONTAINER_NAME="liquid$i"
     echo "  Dumping descriptors from $CONTAINER_NAME..."
-    docker exec $CONTAINER_NAME elements-cli -conf=/elementsd/elements.conf listdescriptors true | jq -r '.descriptors[].desc' > /tmp/federated_privkey_${i}.txt
-    docker cp /tmp/federated_privkey_${i}.txt ${CONTAINER_NAME}:/elementsd/federated_privkey.txt
+    ADDR=$(docker exec $CONTAINER_NAME elements-cli -conf=/elementsd/elements.conf getnewaddress)
+    docker exec $CONTAINER_NAME elements-cli -conf=/elementsd/elements.conf dumpprivkey $ADDR > /tmp/federated_privkey.txt
+    docker cp /tmp/federated_privkey.txt ${CONTAINER_NAME}:/elementsd/federated_privkey.txt
 done
 echo ""
 
@@ -183,16 +188,15 @@ for i in $(seq 1 $NUM_NODES); do
 done
 echo ""
 
-# Step 9: Start daemons
-echo "Step 9: Starting elementsd daemons..."
+# Step 9: Restart containers
+echo "Step 9: Restart containers..."
 for i in $(seq 1 $NUM_NODES); do
     CONTAINER_NAME="liquid$i"
-    echo "  Starting daemon on $CONTAINER_NAME..."
-    docker exec -d $CONTAINER_NAME elementsd -datadir=/elementsd
+    echo "  Restarting container $CONTAINER_NAME..."
+    docker restart $CONTAINER_NAME
     sleep 2
 done
-echo "  Waiting 15 seconds for daemons to fully start..."
-sleep 15
+
 echo ""
 
 # Step 10: Import keys
@@ -200,23 +204,11 @@ echo "Step 10: Importing keys on each node..."
 for i in $(seq 1 $NUM_NODES); do
     CONTAINER_NAME="liquid$i"
     echo "  Creating blank wallet on $CONTAINER_NAME..."
-    docker exec $CONTAINER_NAME elements-cli -conf=/elementsd/elements.conf -named createwallet wallet_name=federated blank=true descriptors=true
+    docker exec $CONTAINER_NAME elements-cli -conf=/elementsd/elements.conf -named createwallet wallet_name=federated blank=true
     
-    echo "  Importing descriptors on $CONTAINER_NAME..."
-    docker exec $CONTAINER_NAME sh -c '
-        line_count=0
-        while read line; do
-            line_count=$((line_count+1))
-            if [ $((line_count % 2)) -eq 0 ]; then
-                is_even="true"
-            else
-                is_even="false"
-            fi
-            DESCRIPTORS="{\"desc\": \"${line}\",\"timestamp\": 0,\"active\": true,\"internal\": ${is_even},\"range\": [0,999]}"
-            DESCRIPTORS="[${DESCRIPTORS}]"
-            elements-cli -conf=/elementsd/elements.conf importdescriptors "$DESCRIPTORS" 2>&1 > /dev/null
-        done < "/elementsd/federated_privkey.txt"
-    '
+    echo "  Importing privatekey on $CONTAINER_NAME..."
+    docker exec $CONTAINER_NAME sh -c 'elements-cli -conf=/elementsd/elements.conf importprivkey $(cat /elementsd/federated_privkey.txt)'
+    
 done
 echo ""
 
@@ -238,7 +230,7 @@ echo "  - Connected to Bitcoin signet: $GENESIS_HASH"
 echo ""
 echo "Node RPC ports:"
 for i in $(seq 1 $NUM_NODES); do
-    RPC_PORT=$((BASE_RPC_PORT + i - 1))
+    RPC_PORT=$((BASE_RPC_PORT + i + 1000 * (i - 1)))
     echo "  - liquid$i: $RPC_PORT"
 done
 echo ""
