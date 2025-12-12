@@ -73,6 +73,7 @@ port=${ELEMENTS_PORT}
 $([ -n "${MAGIC_NUMBER}" ] && echo "pchmessagestart=${MAGIC_NUMBER}")
 
 # Block signing details
-# $([ -n "${SIGNBLOCKSCRIPT}" ] && echo "signblockscript=${SIGNBLOCKSCRIPT}")
-# $([ -n "${CON_MAX_BLOCK_SIG_SIZE}" ] && echo "con_max_block_sig_size=${CON_MAX_BLOCK_SIG_SIZE}")
+$([ -n "${SIGNBLOCKSCRIPT}" ] && echo "signblockscript=${SIGNBLOCKSCRIPT}")
+$([ -n "${CON_MAX_BLOCK_SIG_SIZE}" ] && echo "con_max_block_sig_size=${CON_MAX_BLOCK_SIG_SIZE}")
+$([ -n "${EVBPARAMS}" ] && echo "evbparams=${EVBPARAMS}")
 EOF
