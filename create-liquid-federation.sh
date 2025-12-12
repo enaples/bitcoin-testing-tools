@@ -151,6 +151,7 @@ PUBKEY_JSON="${PUBKEY_JSON}]"
 
 echo "  Creating multisig with pubkeys: $PUBKEY_JSON"
 MULTISIG=$(docker exec liquid1 elements-cli -conf=/elementsd/elements.conf createmultisig $REQUIRED_SIGS "$PUBKEY_JSON")
+echo ""
 REDEEMSCRIPT=$(echo $MULTISIG | jq -r '.redeemScript')
 
 if [ -z "$REDEEMSCRIPT" ]; then
@@ -164,34 +165,39 @@ echo ""
 echo "Step 6: Dumping containers and run them with new config..."
 for i in $(seq 1 $NUM_NODES); do
     CONTAINER_NAME="liquid$i"
-    VOLUME_NAME="bitcoin-testing-tools_shared_vol_liquid$i"
-    RPC_PORT=$((BASE_RPC_PORT + i + 1000 * (i - 1)))
-    P2P_PORT=$((BASE_P2P_PORT + i + 1000 * (i - 1)))
-    
-    echo "  Starting $CONTAINER_NAME (RPC: $RPC_PORT, P2P: $P2P_PORT)..."
-    
-    # Remove container if it exists
-    docker rm -f $CONTAINER_NAME 2>/dev/null || true
+    echo "  Stopping $CONTAINER_NAME..."
+    docker exec $CONTAINER_NAME elements-cli -conf=/elementsd/elements.conf stop || true
+    sleep 2
+done
+sleep 5
+echo ""
 
-    # Remvoe volume if it exists
-    docker volume rm -f $VOLUME_NAME
-    
-    docker run -d \
-        --name $CONTAINER_NAME \
-        -v ${VOLUME_NAME}:/elementsd \
-        --network $NETWORK_NAME \
-        -e ELEMENTS_NETWORK=liquidsignet \
-        -e PARENTGENESISBLOCKHASH=$GENESIS_HASH \
-        -e VALIDATEPEGIN=1 \
-        -e SIGNETCHALLENGE=$SIGNETCHALLENGE \
-        -e MAGIC_NUMBER=$MAGIC_NUMBER \
-        -e ELEMENTS_RPCPORT=$RPC_PORT \
-        -e ELEMENTS_PORT=$P2P_PORT \
-        -e SIGNBLOCKSCRIPT=$SIGNBLOCKSCRIPT \
-        -e CON_MAX_BLOCK_SIG_SIZE=2 \
-        -e EVBPARAMS="dynafed:0:::" \
-        $LIQUID_IMAGE
-    
+# Step 7: Wipe data directories
+echo "Step 7: Wiping data directories..."
+for i in $(seq 1 $NUM_NODES); do
+    CONTAINER_NAME="liquid$i"
+    echo "  Wiping data on $CONTAINER_NAME..."
+    docker exec $CONTAINER_NAME rm -rf /elementsd/liquidsignet
+done
+echo ""
+
+# Step 8: Update configuration files
+echo "Step 8: Updating elements.conf with signblockscript..."
+for i in $(seq 1 $NUM_NODES); do
+    CONTAINER_NAME="liquid$i"
+    echo "  Updating config on $CONTAINER_NAME..."
+    docker exec $CONTAINER_NAME sh -c "echo 'signblockscript=$REDEEMSCRIPT' >> /elementsd/elements.conf"
+    docker exec $CONTAINER_NAME sh -c "echo 'con_max_block_sig_size=2' >> /elementsd/elements.conf"
+    docker exec $CONTAINER_NAME sh -c "echo 'evbparams=dynafed:0:::' >> /elementsd/elements.conf"
+done
+echo ""
+
+# Step 9: Restart containers
+echo "Step 9: Restart containers..."
+for i in $(seq 1 $NUM_NODES); do
+    CONTAINER_NAME="liquid$i"
+    echo "  Restarting container $CONTAINER_NAME..."
+    docker restart $CONTAINER_NAME
     sleep 2
 done
 echo ""
