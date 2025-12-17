@@ -195,6 +195,7 @@ set -e
 # Configuration (injected during setup)
 REDEEMSCRIPT="__REDEEMSCRIPT__"
 REQUIRED_SIGS=__REQUIRED_SIGS__
+NUM_NODES=__NUM_NODES__
 BLOCK_TIME=__BLOCK_TIME__
 LOG_FILE="liquid_miner_debug.log"
 
@@ -228,6 +229,7 @@ log "=== Liquid Block Miner Started ==="
 log "Time: $(date)"
 log "Redeem Script: $REDEEMSCRIPT"
 log "Required Signatures: $REQUIRED_SIGS"
+log "Total Nodes: $NUM_NODES"
 log "Block Time: ${BLOCK_TIME}s"
 log ""
 
@@ -235,6 +237,10 @@ while true; do
     
     log "-----------------------------------"
     log "Mining Tick: $(date)"
+
+    # Select random nodes for this block
+    SELECTED_NODES=($(shuf -i 1-$NUM_NODES -n $REQUIRED_SIGS))
+    log "Selected nodes for signing: ${SELECTED_NODES[*]}"
     
     # 1. Propose Block
     log "Step 1: Requesting new block template from liquid1..."
@@ -252,8 +258,9 @@ while true; do
     log "Step 2: Collecting $REQUIRED_SIGS signatures..."
     SIGS_ARRAY="["
     
-    for i in $(seq 1 $REQUIRED_SIGS); do
-        CONTAINER_NAME="liquid$i"
+    for idx in "${!SELECTED_NODES[@]}"; do
+        NODE_NUM=${SELECTED_NODES[$idx]}
+        CONTAINER_NAME="liquid$NODE_NUM"
         log "  Requesting signature from $CONTAINER_NAME..."
         
         SIG_RES=$(docker exec $CONTAINER_NAME elements-cli -conf=/elementsd/elements.conf signblock "$PROPOSAL_HEX" "$REDEEMSCRIPT" 2>&1 | jq -c '.[0]' 2>&1)
@@ -265,16 +272,16 @@ while true; do
             continue 2
         fi
         
-        if [ $i -gt 1 ]; then
+        if [ $idx -gt 0 ]; then
             SIGS_ARRAY="${SIGS_ARRAY},"
         fi
         SIGS_ARRAY="${SIGS_ARRAY}${SIG_RES}"
-        log "  ✓ Signature $i collected"
+        log "  ✓ Signature from node $NODE_NUM collected"
     done
     SIGS_ARRAY="${SIGS_ARRAY}]"
     
     log "Step 3: Combining signatures..."
-    log "  Signatures array: ${SIGS_ARRAY:0:100}..." # Show first 100 chars
+    log "  Signatures array: ${SIGS_ARRAY}" # Show first 100 chars
     
     # 3. Combine Signatures
     COMBINED_RES=$(docker exec liquid1 elements-cli -conf=/elementsd/elements.conf combineblocksigs "$PROPOSAL_HEX" "$SIGS_ARRAY" "$REDEEMSCRIPT" 2>&1)
@@ -323,11 +330,13 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     # macOS requires empty string after -i
     sed -i '' "s|__REDEEMSCRIPT__|$REDEEMSCRIPT|g" liquid_miner.sh
     sed -i '' "s|__REQUIRED_SIGS__|$REQUIRED_SIGS|g" liquid_miner.sh
+    sed -i '' "s|__NUM_NODES__|$NUM_NODES|g" liquid_miner.sh
     sed -i '' "s|__BLOCK_TIME__|$BLOCK_TIME|g" liquid_miner.sh
 else
     # Linux sed
     sed -i "s|__REDEEMSCRIPT__|$REDEEMSCRIPT|g" liquid_miner.sh
     sed -i "s|__REQUIRED_SIGS__|$REQUIRED_SIGS|g" liquid_miner.sh
+    sed -i "s|__NUM_NODES__|$NUM_NODES|g" liquid_miner.sh
     sed -i "s|__BLOCK_TIME__|$BLOCK_TIME|g" liquid_miner.sh
 fi
 
