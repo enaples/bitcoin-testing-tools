@@ -68,6 +68,9 @@ parentscriptprefix=196
 # Network Ports
 rpcport=${ELEMENTS_RPCPORT}
 port=${ELEMENTS_PORT}
+rpcbind=0.0.0.0:${ELEMENTS_RPCPORT}
+rpcallowip=0.0.0.0/0
+whitelist=0.0.0.0/0
 
 # Custom magic bytes
 $([ -n "${MAGIC_NUMBER}" ] && echo "pchmessagestart=${MAGIC_NUMBER}")
