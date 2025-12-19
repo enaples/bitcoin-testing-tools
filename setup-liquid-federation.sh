@@ -140,6 +140,7 @@ for i in $(seq 1 $NUM_NODES); do
         -e SIGNBLOCKSCRIPT=$REDEEMSCRIPT \
         -e CON_MAX_BLOCK_SIG_SIZE=3000 \
         -e EVBPARAMS="dynafed:0:::" \
+        -p $RPC_PORT:$RPC_PORT \
         $LIQUID_IMAGE > /dev/null
         
     echo "  Started $CONTAINER_NAME (RPC: $RPC_PORT, P2P:$P2P_PORT)"
@@ -197,12 +198,26 @@ REDEEMSCRIPT="__REDEEMSCRIPT__"
 REQUIRED_SIGS=__REQUIRED_SIGS__
 NUM_NODES=__NUM_NODES__
 BLOCK_TIME=__BLOCK_TIME__
+BASE_P2P_PORT=__BASE_P2P_PORT__
 LOG_FILE="liquid_miner_debug.log"
 
 # Function to log both to screen and file
 log() {
     echo "$@" | tee -a "$LOG_FILE"
 }
+
+# Connect every node to node 1 to ensure P2P mesh
+IP_NODE1=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' liquid1)
+
+for i in $(seq 2 $NUM_NODES); do
+    CONTAINER_NAME="liquid$i"
+    docker exec $CONTAINER_NAME elements-cli -conf=/elementsd/elements.conf addnode "$IP_NODE1:$BASE_P2P_PORT" "onetry" > /dev/null
+done
+echo "  Nodes interconnected."
+
+log "Give time to sync blocks..."
+### TODO: use while to verify every node is on the same page in terms of best chain
+sleep 5
 
 # Rotate log file (only at script startup)
 rotate_log() {
@@ -252,7 +267,7 @@ while true; do
         sleep 5
         continue
     fi
-    log "  Block template received (${#PROPOSAL_HEX} chars)"
+    log "  Block template received: ${PROPOSAL_HEX}"
     
     # 2. Collect Signatures
     log "Step 2: Collecting $REQUIRED_SIGS signatures..."
@@ -332,12 +347,14 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     sed -i '' "s|__REQUIRED_SIGS__|$REQUIRED_SIGS|g" liquid_miner.sh
     sed -i '' "s|__NUM_NODES__|$NUM_NODES|g" liquid_miner.sh
     sed -i '' "s|__BLOCK_TIME__|$BLOCK_TIME|g" liquid_miner.sh
+    sed -i '' "s|__BASE_P2P_PORT__|$BASE_P2P_PORT|g" liquid_miner.sh
 else
     # Linux sed
     sed -i "s|__REDEEMSCRIPT__|$REDEEMSCRIPT|g" liquid_miner.sh
     sed -i "s|__REQUIRED_SIGS__|$REQUIRED_SIGS|g" liquid_miner.sh
     sed -i "s|__NUM_NODES__|$NUM_NODES|g" liquid_miner.sh
     sed -i "s|__BLOCK_TIME__|$BLOCK_TIME|g" liquid_miner.sh
+    sed -i "s|__BASE_P2P_PORT__|$BASE_P2P_PORT|g" liquid_miner.sh
 fi
 
 # Make the script executable
