@@ -24,15 +24,12 @@ mainchainrpcpassword=bitcoin
 [${ELEMENTS_NETWORK}]
 # ===== PARENT CHAIN CONFIGURATION =====
 # Logic: If a parent genesis hash is provided, we enable parent chain mode
-$([ -n "${PARENTGENESISBLOCKHASH}" ] && echo "con_has_parent_chain=1")
+con_signed_blocks=1
 $([ -n "${PARENTGENESISBLOCKHASH}" ] && echo "parentgenesisblockhash=${PARENTGENESISBLOCKHASH}")
 
 # Signet uses signed blocks. If you have a custom challenge, set it here.
 # If using standard signet architecture, this script is required for validation.
 $([ -n "${SIGNETCHALLENGE}" ] && echo "con_parent_chain_signblockscript=${SIGNETCHALLENGE}")
-
-# Signet PoW limit
-con_parentpowlimit=00000377ae000000000000000000000000000000000000000000000000000000
 
 # Pegin confirmation depth
 peginconfirmationdepth=${PEGIN_CONFIRMATION_DEPTH:-10}
@@ -48,9 +45,6 @@ multi_data_permitted=1
 # Fedpeg script - OP_TRUE for easy testing
 fedpegscript=${FEDPEGSCRIPT:-51}
 
-# Disable PAK enforcement
-enforce_pak=${ENFORCE_PAK:-0}
-
 # ===== ADDRESS PREFIXES =====
 # Explicitly set these to override defaults, allowing us to use any chain name
 bech32_hrp=${BECH32_HRP:-tex}
@@ -61,9 +55,10 @@ blindedprefix=${BLINDED_PREFIX:-23}
 secretprefix=${SECRET_PREFIX:-239}
 
 # Parent chain prefixes (Bitcoin Signet)
-parent_bech32_hrp=tb
-parentpubkeyprefix=111
-parentscriptprefix=196
+parent_bech32_hrp=${PARENT_BECH32_HRP:-tb}
+parent_blech32_hrp=${PARENT_BLECH32_HRP:-tb}
+parentpubkeyprefix=${PARENT_PUBKEY_PREFIX:-111}
+parentscriptprefix=${PARENT_SCRIPT_PREFIX:-196}
 
 # Network Ports
 rpcport=${ELEMENTS_RPCPORT}
