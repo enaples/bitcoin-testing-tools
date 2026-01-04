@@ -10,7 +10,7 @@ BTC_CONTAINER="btc_sig_miner"
 NETWORK_NAME="bitcoin-testing-tools_default"
 
 # Liquid configuration
-LIQUID_IMAGE="liquid:23.3.1"
+LIQUID_IMAGE="liquid:23.2.1"
 NUM_NODES=5              # Total number of federation nodes
 REQUIRED_SIGS=3          # M in M-of-N multisig
 BASE_RPC_PORT=39884      # Starting RPC port
@@ -58,7 +58,6 @@ docker run -d --name $TEMP_CONTAINER \
     -e ELEMENTS_NETWORK=liquidsignet \
     -e PARENTGENESISBLOCKHASH=$GENESIS_HASH \
     -e VALIDATEPEGIN=0 \
-    -e SIGNETCHALLENGE=$SIGNETCHALLENGE \
     -e MAGIC_NUMBER=$MAGIC_NUMBER \
     -e EVBPARAMS="dynafed:0:::" \
     $LIQUID_IMAGE > /dev/null
@@ -138,6 +137,8 @@ for i in $(seq 1 $NUM_NODES); do
         -e ELEMENTS_RPCPORT=$RPC_PORT \
         -e ELEMENTS_PORT=$P2P_PORT \
         -e SIGNBLOCKSCRIPT=$REDEEMSCRIPT \
+        -e PEGIN_CONFIRMATION_DEPTH=1 \
+        -e FEDPEGSCRIPT=$REDEEMSCRIPT \
         -e CON_MAX_BLOCK_SIG_SIZE=3000 \
         -e EVBPARAMS="dynafed:0:::" \
         -p $RPC_PORT:$RPC_PORT \
@@ -205,6 +206,13 @@ LOG_FILE="liquid_miner_debug.log"
 log() {
     echo "$@" | tee -a "$LOG_FILE"
 }
+
+# Make sure that main wallet is loaded
+for i in $(seq 1 $NUM_NODES); do
+    CONTAINER_NAME="liquid$i"
+    log "  Loading default wallet on $CONTAINER_NAME"
+    docker exec $CONTAINER_NAME elements-cli -conf=/elementsd/elements.conf loadwallet federated 2>&1 >/dev/null || true
+done
 
 # Connect every node to node 1 to ensure P2P mesh
 IP_NODE1=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' liquid1)
