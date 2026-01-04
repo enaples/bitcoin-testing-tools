@@ -24,12 +24,9 @@ mainchainrpcpassword=bitcoin
 [${ELEMENTS_NETWORK}]
 # ===== PARENT CHAIN CONFIGURATION =====
 # Logic: If a parent genesis hash is provided, we enable parent chain mode
-con_signed_blocks=1
+con_signed_blocks=${SIGNED_BLOCK:-1}
+con_has_parent_chain=${PARENT_CHAIN:-1}
 $([ -n "${PARENTGENESISBLOCKHASH}" ] && echo "parentgenesisblockhash=${PARENTGENESISBLOCKHASH}")
-
-# Signet uses signed blocks. If you have a custom challenge, set it here.
-# If using standard signet architecture, this script is required for validation.
-$([ -n "${SIGNETCHALLENGE}" ] && echo "con_parent_chain_signblockscript=${SIGNETCHALLENGE}")
 
 # Pegin confirmation depth
 peginconfirmationdepth=${PEGIN_CONFIRMATION_DEPTH:-10}
