@@ -5,7 +5,7 @@ FROM ${OS}:${OS_VER} as electrum-server
 # Set TimeZone
 ENV TIMEZONE=Europe/Rome
 # On one elements node:
-# elements-cli -conf=/path/to/elements.conf getblock $(elements-cli -conf=/path/to/elements.conf getblockhash 0) 2 | jq .tx[1].vin[0].txid
+# elements-cli -conf=/elementsd/elements.conf getblock $(elements-cli -conf=/elementsd/elements.conf getblockhash 0) 2 | jq .tx[1].vin[0].txid
 ENV CUSTOM_LIQUID_ISSUANCE_PREVOUT=""
 RUN ln -snf /usr/share/zoneinfo/$TIMEZONE /etc/localtime && echo $TIMEZONE > /etc/timezone
 
@@ -41,5 +41,6 @@ CMD exec electrs \
     --cookie "elements:elements" \
     --db-dir "/electrum/db" \
     --jsonrpc-import \
+    --http-addr "0.0.0.0:7000" \
     --electrum-rpc-addr "0.0.0.0:60701" \
     --initial-issuance-prevout "${CUSTOM_LIQUID_ISSUANCE_PREVOUT}"
