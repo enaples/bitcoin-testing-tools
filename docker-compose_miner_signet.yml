@@ -16,7 +16,7 @@ services:
       context: bitcoind_signet_miner_plugnplay
     image: bitcoind_signet_miner
     environment:
-      - BLOCK_MINING_SEC=90
+      - BLOCK_MINING_SEC=10
       - POISSON=false
     volumes:
       - shared_vol_btc:/bitcoind
@@ -30,6 +30,17 @@ services:
     image: electrs
     volumes:
       - shared_vol_btc:/bitcoind
+    depends_on:
+      - btc_sig_miner
+
+  ### Blockstream electrs (bitcoin)
+  blockstream-electrs:
+    container_name: blockstream-electrs
+    build:
+      context: blockstream-electrs
+    image: blockstream-electrs
+    volumes:
+      - shared_vol_blockstream_electrs:/electrum 
     depends_on:
       - btc_sig_miner
 
@@ -145,6 +156,7 @@ volumes:
   shared_vol_ln:
   shared_vol_mempool_db:
   shared_vol_mempool_api:
+  shared_vol_blockstream_electrs:
 
 networks:
   btc-testing-tools:
