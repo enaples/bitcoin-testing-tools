@@ -12,6 +12,7 @@ RUN DEBIAN_FRONTEND=noninteractive \
     nano curl gpg jq openssl git cargo clang cmake
 
 ARG ELECTRS_VERSION="0.9.13"
+ENV BTC_HOST="btc_sign_miner"
 RUN mkdir -p /electrum
 
 RUN cd /electrum && \
