@@ -43,6 +43,8 @@ services:
       - shared_vol_blockstream_electrs:/electrum 
     depends_on:
       - btc_sig_miner
+    expose:
+      - 7070
 
   ### Mempool
   web:
