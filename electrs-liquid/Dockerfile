@@ -9,6 +9,7 @@ ENV TIMEZONE=Europe/Rome
 ENV CUSTOM_LIQUID_ISSUANCE_PREVOUT=""
 RUN ln -snf /usr/share/zoneinfo/$TIMEZONE /etc/localtime && echo $TIMEZONE > /etc/timezone
 
+ENV EL_HOST="liquid1"
 # Install dependencies
 RUN DEBIAN_FRONTEND=noninteractive \
     apt-get update -qq && apt-get install -qq -y \
