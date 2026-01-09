@@ -23,11 +23,11 @@ services:
     depends_on:
       - tor
 
-  electrs:
-    container_name: electrs
+  electrs-romanz:
+    container_name: electrs-romanz
     build:
-      context: electrs
-    image: electrs
+      context: electrs-romanz
+    image: electrs_romanz
     volumes:
       - shared_vol_btc:/bitcoind
     depends_on:
