@@ -23,8 +23,6 @@ COPY create-conf.sh /usr/local/bin
 RUN chmod +x /usr/local/bin/create-conf.sh
 COPY tor-entrypoint.sh /usr/local/bin/tor-entrypoint.sh
 RUN chmod +x /usr/local/bin/tor-entrypoint.sh
-COPY wait-for-bitcoind.sh /usr/local/bin
-RUN chmod +x /usr/local/bin/wait-for-bitcoind.sh
 
 RUN usermod -a -G debian-tor root
 
