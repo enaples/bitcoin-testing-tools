@@ -1,8 +1,9 @@
+cat <<- EOF > "/bitcoind/bitcoin.conf"
 signet=1
 
 [signet]
 
-rpcauth=bitcoin:c8c8b9740a470454255b7a38d4f38a52$e8530d1c739a3bb0ec6e9513290def11651afbfd2b979f38c16ec2cf76cf348a
+rpcauth=bitcoin:c8c8b9740a470454255b7a38d4f38a52\$e8530d1c739a3bb0ec6e9513290def11651afbfd2b979f38c16ec2cf76cf348a
 txindex=1
 server=1
 
@@ -17,17 +18,19 @@ rpcallowip=0.0.0.0/0
 whitelist=0.0.0.0/0
 
 # Network
-torcontrol=tor:9051
+torcontrol=${TOR_HOST}:9051
 torpassword=bitcoin
 listen=1
 listenonion=1
-proxy=tor:9050
+proxy=${TOR_HOST}:9050
 onlynet=onion
 
 zmqpubrawblock=tcp://0.0.0.0:28332
 zmqpubrawtx=tcp://0.0.0.0:28333
 zmqpubhashblock=tcp://0.0.0.0:28334
-signetchallenge=00000000signetofminernode
+signetchallenge=${SIGNETCHALLENGE}
 
-seednode=0.0.0.0:38333
-addnode=0.0.0.0:38333
+seednode=${SEED_NODE_URL}:38333
+addnode=${SEED_NODE_URL}:38333
+
+EOF

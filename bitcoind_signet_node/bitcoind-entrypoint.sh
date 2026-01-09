@@ -1,12 +1,8 @@
 #!/bin/bash
 set -Eeuo pipefail
 
-# Move bitcoin.conf to /bitcoind
-if [ -f "/data/bitcoin.conf" ]; then
-    mv /data/bitcoin.conf /bitcoind/bitcoin.conf
-    ln -s /bitcoind /root/.
-    # If not is assumed that the bitcoin.conf is already in /bitcoind
-fi
+# Create bitcoind .conf
+/usr/local/bin/create-conf.sh
 
 
 echo "Starting bitcoind..."

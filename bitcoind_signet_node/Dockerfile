@@ -22,11 +22,15 @@ ADD $GH_URL/contrib/completions/bash/bitcoin-cli.bash $BC/bitcoin-cli
 ADD $GH_URL/contrib/completions/bash/bitcoind.bash $BC/bitcoind
 ADD $GH_URL/contrib/completions/bash/bitcoin-tx.bash $BC/bitcoin-tx
 
-# Copy bitcoind configuration directory
-COPY bitcoind /data
+ENV SIGNETCHALLENGE="00000000signetofminernode"
+ENV SEED_NODE_URL="bitcoinminerdotonionaddress.onion"
+ENV TOR_HOST="tor"
+ENV FAUCET_URL="bitcoindfaucetonionaddress.onion"
 
 COPY cli /usr/local/bin
 COPY bashrc /root/.bashrc
+COPY create-conf.sh /usr/local/bin
+RUN chmod +x /usr/local/bin/create-conf.sh
 COPY bitcoind-entrypoint.sh /usr/local/bin
 RUN chmod +x /usr/local/bin/bitcoind-entrypoint.sh
 COPY fund-bitcoind.sh /usr/local/bin
