@@ -7,11 +7,15 @@ RUN apt update && apt install -y jq && \
     mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak && \
     mkdir -p /etc/nginx/streams-enabled
 
+ENV BTC_HOST="btc_sig_miner"
+ENV ROMANZ_ELECTRS_HOST="electrs"
+ENV ELEMENTS_ELECTRS_HOST="liquid_electrs"
+ENV BLOCKSTREAM_ELECTRS_HOST="blockstream_electrs"
 COPY nginx.conf /etc/nginx
 COPY nginx-entrypoint.sh /usr/local/bin
-COPY wait-for-bitcoind.sh /usr/local/bin
+COPY create-conf.sh /usr/local/bin
 RUN chmod +x /usr/local/bin/nginx-entrypoint.sh
-RUN chmod +x /usr/local/bin/wait-for-bitcoind.sh
+RUN chmod +x /usr/local/bin/create-conf.sh
 
 ENTRYPOINT ["/usr/local/bin/nginx-entrypoint.sh"]
 CMD ["nginx", "-g", "daemon off;"]
