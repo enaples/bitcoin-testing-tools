@@ -19,6 +19,8 @@ ENV ELEMENTSD_VER="23.3.1"
 ENV ELEMENTS_NETWORK="liquidsignet"
 ENV ELEMENTS_RPCPORT=38884
 ENV ELEMENTS_PORT=38886
+ENV BTC_HOST="btc_sig_miner"
+ENV TOR_HOST="tor"
 COPY elementsd-download.sh /usr/local/bin
 RUN chmod +x /usr/local/bin/elementsd-download.sh
 COPY create-conf.sh /usr/local/bin

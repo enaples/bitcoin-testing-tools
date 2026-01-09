@@ -11,12 +11,20 @@ server=1
 listen=1
 txindex=1
 
+# Network
+torcontrol=${TOR_HOST}:9051
+torpassword=bitcoin
+listen=1
+listenonion=1
+proxy=${TOR_HOST}:9050
+onlynet=onion
+
 # Validate pegin: 1 = check against bitcoind, 0 = trust (for testing/genesis gen)
 validatepegin=${VALIDATEPEGIN:-0}
 
 # Parent chain RPC connection
 mainchainrpcport=38332
-mainchainrpchost=btc_sig_miner
+mainchainrpchost=${BTC_HOST}
 mainchainrpcuser=bitcoin
 mainchainrpcpassword=bitcoin
 
