@@ -1,0 +1,88 @@
+version: "3.3"
+
+services:
+  tor:
+    container_name: tor
+    build:
+      context: tor
+    image: tor_img
+    port:
+      - "9050:9050"
+      - "9051:9051"
+    expose:
+      - "9050"
+      - "9051"
+
+  btc_sig_node:
+    container_name: btc_sig_node
+    build:
+      context: bitcoind_signet_node
+    image: bitcoind_signet_node
+    volumes:
+      - shared_vol_btc:/bitcoind
+    environment:
+      - SIGNETCHALLENGE=0000signetchallenge
+      - SEED_NODE_URL=bitcoinmineronionaddress.onion
+      - FAUCET_URL=faucetonionaddress.onion
+    port:
+      - "38333:38333"
+      - "38332:38332"
+    expose:
+      - "38333"
+      - "38332"
+
+  liquid:
+    container_name: liquid
+    build:
+      context: liquid
+    image: liquid
+    environment:
+      - NETWORK_NAME=liquidsignet
+      - GENESIS_HASH=0000somehash
+      - SIGNETCHALLENGE=0000signetchallenge
+      - MAGIC_NUMBER=0000
+      - REDEEMSCRIPT=0000somescript
+      - BTC_HOST=btc_sig_node
+    volumes:
+      - shared_vol_liquid:/elementsd
+
+  electrs-blockstream:
+    container_name: electrs-blockstream
+    build:
+      context: electrs-blockstream
+    image: electrs_blockstream
+    environment:
+      - BTC_HOST=btc_sig_node
+    volumes:
+      - shared_vol_electrs_blockstream:/electrum
+    expose:
+      - 7070
+
+  electrs-liquid:
+    container_name: electrs-liquid
+    build:
+      context: electrs-liquid
+    image: electrs_liquid
+    environment:
+      - EL_HOST=liquid
+      - CUSTOM_LIQUID_ISSUANCE_PREVOUT=0000someissuancehash
+    volumes:
+      - shared_vol_electrs_liquid:/electrum
+    expose:
+      - 7000
+
+  nginx:
+    container_name: nginx
+    build:
+      context: nginx
+    image: nginx_img
+    expose:
+      - "60602"
+      - "60702"
+      - "60502"
+
+volumes:
+  shared_vol_btc:
+  shared_vol_liquid:
+  shared_vol_electrs_blockstream:
+  shared_vol_electrs_liquid:
