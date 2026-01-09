@@ -25,6 +25,9 @@ COPY elementsd-download.sh /usr/local/bin
 RUN chmod +x /usr/local/bin/elementsd-download.sh
 COPY create-conf.sh /usr/local/bin
 RUN chmod +x /usr/local/bin/create-conf.sh
+COPY cli /usr/local/bin
+RUN chmod +x /usr/local/bin/cli
+
 RUN elementsd-download.sh
 
 ADD https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/lightning-cli.bash-completion /usr/share/bash-completion/completions/lightning-cli

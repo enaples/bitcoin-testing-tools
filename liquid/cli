@@ -1,0 +1,5 @@
+#!/bin/bash
+#
+# Helper script used as an alias for elements-cli with the necessary arguments
+#
+/usr/bin/elements-cli -datadir=/elementsd $@
