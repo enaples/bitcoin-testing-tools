@@ -23,9 +23,9 @@ EOF
 
 # Add hidden services only if nslookup succeeds
 add_hidden_service "nginx" "hidden_service_electrs_romanz" "60602" "60602"
-add_hidden_service "nginx" "hidden_service_electrs_liquid" "60702" "60702"
+# add_hidden_service "nginx" "hidden_service_electrs_liquid" "60702" "60702"
 add_hidden_service "nginx" "hidden_service_electrs_blockstream" "60502" "60502"
-add_hidden_service "cln" "hidden_service_cl_rest" "8080" "3010"
+# add_hidden_service "cln" "hidden_service_cl_rest" "8080" "3010"
 add_hidden_service "faucet" "hidden_service_faucet" "5050" "5000"
 # add_hidden_service "lnbits" "hidden_service_lnbits" "7070" "7000"
 add_hidden_service "mempool_web" "hidden_service_mempool" "80" "8080"
