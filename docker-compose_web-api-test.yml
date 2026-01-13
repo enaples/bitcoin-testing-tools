@@ -55,8 +55,8 @@ services:
       - BTC_HOST=btc_sig_node
     volumes:
       - shared_vol_electrs_blockstream:/electrum
-    expose:
-      - 7070
+    ports:
+      - 7070:7070
 
   electrs-liquid:
     container_name: electrs-liquid
@@ -68,18 +68,33 @@ services:
       - CUSTOM_LIQUID_ISSUANCE_PREVOUT=0000someissuancehash
     volumes:
       - shared_vol_electrs_liquid:/electrum
-    expose:
-      - 7000
+    ports:
+      - 7000:7000
 
   nginx:
     container_name: nginx
     build:
       context: nginx
     image: nginx_img
-    expose:
-      - "60602"
-      - "60702"
-      - "60502"
+    ports:
+      - 60602:60602
+      - 60702:60702
+      - 60502:60502
+      - 8080:8080
+
+  # Bitcoin Esplora
+  esplora-bitcoin:
+    container_name: esplora-bitcoin
+    build: 
+      context: esplora-bitcoin
+    image: eplsora_bitcoin
+    volumes:
+      - shared_vol_esplora_bitcoin:/app
+    depends_on:
+      - electrs-blockstream
+      - nginx
+    ports:
+      - 8000:8000
 
 volumes:
   shared_vol_btc:
