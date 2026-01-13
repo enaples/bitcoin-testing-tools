@@ -39,5 +39,6 @@ CMD exec electrs \
     --cookie "bitcoin:bitcoin" \
     --db-dir "/electrum/db" \
     --jsonrpc-import \
+    --address-search \
     --http-addr "0.0.0.0:7070" \
     --electrum-rpc-addr "0.0.0.0:60501" 
