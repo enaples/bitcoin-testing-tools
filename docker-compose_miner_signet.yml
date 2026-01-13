@@ -34,17 +34,31 @@ services:
       - btc_sig_miner
 
   ### Blockstream electrs (bitcoin)
-  blockstream-electrs:
-    container_name: blockstream-electrs
+  electrs-blockstream:
+    container_name: electrs-blockstream
     build:
-      context: blockstream-electrs
-    image: blockstream-electrs
+      context: electrs-blockstream
+    image: electrs_blockstream
     volumes:
-      - shared_vol_blockstream_electrs:/electrum 
+      - shared_vol_electrs_blockstream:/electrum 
     depends_on:
       - btc_sig_miner
-    expose:
-      - 7070
+    ports:
+      - 7070:7070
+
+  # Bitcoin Esplora
+  esplora-bitcoin:
+    container_name: esplora-bitcoin
+    build: 
+      context: esplora-bitcoin
+    image: eplsora_bitcoin
+    volumes:
+      - shared_vol_esplora_bitcoin:/app
+    depends_on:
+      - electrs-blockstream
+      - nginx
+    ports:
+      - 8000:8000
 
   ### Mempool
   web:
@@ -101,6 +115,7 @@ services:
     image: nginx_img
     ports:
       - 60602:60602
+      - 8080:8080
 
   cln:
     container_name: cln
@@ -128,37 +143,13 @@ services:
     ports:
       - 5000:5000
 
-  # lnbits:
-  #   container_name: lnbits
-  #   build:
-  #     context: lnbits
-  #   image: lnbits_img
-  #   environment:
-  #     - BTC_HOST=btc_sig_miner
-  #   volumes:
-  #     - shared_vol_ln:/lightningd
-  #   ports:
-  #     - "7000:7000"
-
-  # rtl:
-  #   container_name: rtl
-  #   build:
-  #     context: rtl
-  #   image: rtl
-  #   volumes:
-  #     - shared_vol_ln:/lightningd
-  #   environment:
-  #     - BTC_HOST=btc_sig_miner
-  #     - CLN_REST_HOST=c-lightning-rest
-  #   ports:
-  #     - "3000:3000"
-
 volumes:
   shared_vol_btc:
   shared_vol_ln:
   shared_vol_mempool_db:
   shared_vol_mempool_api:
-  shared_vol_blockstream_electrs:
+  shared_vol_electrs_blockstream:
+  shared_vol_esplora_bitcoin:
 
 networks:
   btc-testing-tools:
