@@ -7,11 +7,10 @@ RUN apk add --no-cache git bash curl && \
 
 WORKDIR /app
 
-# Set environment variables
+# Set default environment variables
 ENV FLAVOR="bitcoin-signet"
-ENV ELECTRS_BLOCKSTREAM_HOST="electrs-blockstream"
-# Check the electrs-blockstream backend configuration on nginx side to verify the correct endpoint
-ENV API_URL="http://localhost:8080"
+ENV BACKEND_PORT=8080
+ENV PORT=9000
 ENV BASE_HREF="/"
 
 # Install dependencies
@@ -23,11 +22,11 @@ RUN npm install -g serve
 # Make build script executable
 RUN chmod +x build.sh
 
-# Build the application
-RUN npm run dist -- $FLAVOR
+# Don't build at image build time - build at container start time
+# This allows runtime configuration of FLAVOR and API_URL
 
 # Expose port
-EXPOSE 8000
+EXPOSE $PORT
 
-# Serve the built files
-CMD ["serve", "dist", "-l", "8000", "-s"]
+# Build and serve at runtime with proper environment variables
+CMD sh -c "API_URL=http://localhost:${BACKEND_PORT} npm run dist -- ${FLAVOR} && serve dist -l ${PORT} -s"
