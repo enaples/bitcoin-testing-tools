@@ -51,7 +51,7 @@ services:
     container_name: esplora-bitcoin
     build: 
       context: esplora-bitcoin
-    image: eplsora_bitcoin
+    image: esplora_bitcoin
     volumes:
       - shared_vol_esplora_bitcoin:/app
     depends_on:
@@ -61,52 +61,53 @@ services:
       - 8000:8000
 
   ### Mempool
-  web:
-    container_name: mempool_web
-    image: mempool/frontend:latest
-    environment:
-      FRONTEND_HTTP_PORT: "8080"
-      BACKEND_MAINNET_HTTP_HOST: "api"
-    restart: on-failure
-    stop_grace_period: 1m
-    command: "./wait-for db:3306 --timeout=720 -- nginx -g 'daemon off;'"
-    ports:
-      - 80:8080
-  api:
-    container_name: mempool_api
-    image: mempool/backend:latest
-    environment:
-      MEMPOOL_NETWORK: "signet"
-      MEMPOOL_BACKEND: "electrum"
-      ELECTRUM_HOST: "electrs"
-      ELECTRUM_PORT: 60601
-      ELECTRUM_TLS_ENABLED: "true"
-      DATABASE_HOST: "mempool_db"
-      DATABASE_DATABASE: "mempool"
-      DATABASE_USERNAME: "mempool"
-      DATABASE_PASSWORD: "mempool"
-      CORE_RPC_HOST: "btc_sig_miner"
-      CORE_RPC_PORT: 38332
-      CORE_RPC_USERNAME: "bitcoin"
-      CORE_RPC_PASSWORD: "bitcoin"
-      STATISTICS_ENABLED: "true"
-    restart: on-failure
-    stop_grace_period: 1m
-    command: "./wait-for-it.sh db:3306 --timeout=720 --strict -- ./start.sh"
-    volumes:
-      - shared_vol_mempool_api:/backend/cache
-  db:
-    container_name: mempool_db
-    environment:
-      MYSQL_DATABASE: "mempool"
-      MYSQL_USER: "mempool"
-      MYSQL_PASSWORD: "mempool"
-      MYSQL_ROOT_PASSWORD: "admin"
-    image: mariadb:10.5.21
-    restart: on-failure
-    stop_grace_period: 1m
-    volumes:
-      - shared_vol_mempool_db:/var/lib/mysql  
+  ### Images pulled are not for linux/arm/v7
+  # web:
+  #   container_name: mempool_web
+  #   image: mempool/frontend:latest
+  #   environment:
+  #     FRONTEND_HTTP_PORT: "8080"
+  #     BACKEND_MAINNET_HTTP_HOST: "api"
+  #   restart: on-failure
+  #   stop_grace_period: 1m
+  #   command: "./wait-for db:3306 --timeout=720 -- nginx -g 'daemon off;'"
+  #   ports:
+  #     - 80:8080
+  # api:
+  #   container_name: mempool_api
+  #   image: mempool/backend:latest
+  #   environment:
+  #     MEMPOOL_NETWORK: "signet"
+  #     MEMPOOL_BACKEND: "electrum"
+  #     ELECTRUM_HOST: "electrs"
+  #     ELECTRUM_PORT: 60601
+  #     ELECTRUM_TLS_ENABLED: "true"
+  #     DATABASE_HOST: "mempool_db"
+  #     DATABASE_DATABASE: "mempool"
+  #     DATABASE_USERNAME: "mempool"
+  #     DATABASE_PASSWORD: "mempool"
+  #     CORE_RPC_HOST: "btc_sig_miner"
+  #     CORE_RPC_PORT: 38332
+  #     CORE_RPC_USERNAME: "bitcoin"
+  #     CORE_RPC_PASSWORD: "bitcoin"
+  #     STATISTICS_ENABLED: "true"
+  #   restart: on-failure
+  #   stop_grace_period: 1m
+  #   command: "./wait-for-it.sh db:3306 --timeout=720 --strict -- ./start.sh"
+  #   volumes:
+  #     - shared_vol_mempool_api:/backend/cache
+  # db:
+  #   container_name: mempool_db
+  #   environment:
+  #     MYSQL_DATABASE: "mempool"
+  #     MYSQL_USER: "mempool"
+  #     MYSQL_PASSWORD: "mempool"
+  #     MYSQL_ROOT_PASSWORD: "admin"
+  #   image: mariadb:10.5.21
+  #   restart: on-failure
+  #   stop_grace_period: 1m
+  #   volumes:
+  #     - shared_vol_mempool_db:/var/lib/mysql  
 
   nginx:
     container_name: nginx
