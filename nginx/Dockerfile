@@ -21,4 +21,4 @@ RUN chmod +x /usr/local/bin/wait-for-bitcoind.sh
 ENTRYPOINT ["/usr/local/bin/nginx-entrypoint.sh"]
 CMD ["nginx", "-g", "daemon off;"]
 
-EXPOSE 60602
+EXPOSE 60602 60702 60502 8080 9090

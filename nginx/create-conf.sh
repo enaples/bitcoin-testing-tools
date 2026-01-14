@@ -113,7 +113,7 @@ http {
     }
 
     server {
-        listen 9000;
+        listen 9090;
         server_name ${ELEMENTS_ELECTRS_HOST};
 
         # Serve the Esplora frontend (static files)
