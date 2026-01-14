@@ -48,15 +48,19 @@ services:
 
   # Bitcoin Esplora
   esplora-bitcoin:
-    container_name: esplora-bitcoin
+    container_name: esplora
     build: 
-      context: esplora-bitcoin
-    image: esplora_bitcoin
+      context: esplora
+    image: esplora
     volumes:
       - shared_vol_esplora_bitcoin:/app
     depends_on:
       - electrs-blockstream
       - nginx
+    environment:
+      - FLAVOR=bitcoin-signet
+      - BACKEND_PORT=8080
+      - PORT=8000
     ports:
       - 8000:8000
 
@@ -117,6 +121,7 @@ services:
     ports:
       - 60602:60602
       - 8080:8080
+      - 9090:9090
 
   cln:
     container_name: cln
