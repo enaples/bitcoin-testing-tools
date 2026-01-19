@@ -2,10 +2,7 @@
 set -Eeuo pipefail
 
 # Generate a new receiving address for c-lightning wallet
-ADDR=$(lightning-cli --lightning-dir=/lightningd newaddr | jq '.bech32' -r)
-
-# Bitcoin faucet .onion address
-FAUCET_URL=faucet
+ADDR=$(lightning-cli --conf=/lightningd/lightning.conf newaddr | jq '.p2tr' -r)
 
 if [[ $FAUCET_URL == *"onion"* ]]; then
     RESPONSE=`curl --silent --socks5-hostname tor:9050 "http://${FAUCET_URL}:5050/faucet?address=${ADDR}"`

@@ -1,5 +1,5 @@
 ARG OS=ubuntu
-ARG OS_VER=focal
+ARG OS_VER=noble
 FROM ${OS}:${OS_VER} AS os-base
 
 # Set TimeZone
@@ -8,28 +8,31 @@ RUN ln -snf /usr/share/zoneinfo/$TIMEZONE /etc/localtime && echo $TIMEZONE > /et
 
 # Install dependencies
 RUN DEBIAN_FRONTEND=noninteractive \
-    apt-get update -qq && apt-get install -qq -y --no-install-recommends \
-    libpq-dev curl unzip jq bash-completion gpg gpg-agent xz-utils nmap nano xxd \
-    autoconf automake build-essential git libtool libgmp-dev libsqlite3-dev \
-    python3 python3-pip net-tools zlib1g-dev libsodium-dev gettext \
-    valgrind shellcheck cppcheck libsecp256k1-dev dirmngr
+    apt-get update -qq && apt-get install -qq -y \
+    jq curl autoconf automake build-essential git libtool libsqlite3-dev libffi-dev \
+    python3 python3-pip net-tools zlib1g-dev libsodium-dev gettext lowdown \
+    valgrind libpq-dev shellcheck cppcheck libsecp256k1-dev lowdown protobuf-compiler
 
-RUN pip3 install --upgrade pip && \
-    pip3 install mako && \
-    pip3 install --user poetry
+# Install Rust via rustup (newer version than apt packages)
+ENV PATH="/root/.cargo/bin:/root/.local/bin:$PATH"
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+
+# Install uv
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 
 FROM os-base AS cln-install
 
 # Get bitcoin-cli
 # Install bitcoind
-ENV BITCOIND_VER="24.0.1"
+ENV BITCOIND_VER="28.1"
 ENV BTC_HOST="btc_sig_miner"
+ENV FAUCET_URL="faucet"
 COPY bitcoind-download.sh /usr/local/bin
 RUN chmod +x /usr/local/bin/bitcoind-download.sh
 RUN bitcoind-download.sh
 
 # Install c-lightning
-ENV CL_VER="23.02"
+ENV CL_VER="25.12"
 ENV CL_PORT=39735
 COPY c-lightning-download.sh /usr/local/bin
 RUN chmod +x /usr/local/bin/c-lightning-download.sh

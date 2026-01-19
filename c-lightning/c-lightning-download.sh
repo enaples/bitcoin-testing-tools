@@ -36,9 +36,9 @@ case $architecture in
         cd /tmp/lightning && \
         # cln v23.02 was signed by Alex Myers whose key is not under /contrib/keys
         # git verify-tag v${CL_VER} && \
-        ./configure --enable-experimental-features --enable-developer && \
-        make && \
-        make install
+        ./configure && \
+        RUST_PROFILE=release uv run make && \
+        RUST_PROFILE=release make install
         
         echo "alias lightning-cli=\"lightning-cli --lightning-dir=/lightningd\"
         [[ \$PS1 && -f /usr/share/bash-completion/bash_completion ]] && \\

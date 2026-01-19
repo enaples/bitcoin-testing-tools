@@ -1,13 +1,15 @@
-cat <<- EOF > "/lightningd/config"
+cat <<- EOF > "/lightningd/lightning.conf"
 network=signet
 bitcoin-rpcuser=bitcoin
 bitcoin-rpcpassword=bitcoin
 bitcoin-rpcconnect=$BTC_HOST
 bitcoin-rpcport=38332
+lightning-dir=/lightningd
 
-# Newr version only
-#clnrest-port=3010
+clnrest-port=3010
 
+developer
+large-channel
 log-level=debug
 log-file=/lightningd/lightningd.log
 
