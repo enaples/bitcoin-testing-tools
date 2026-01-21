@@ -1,16 +1,10 @@
 #!/bin/bash
 set -Eeuo pipefail
 
-# Create config file
-/usr/local/bin/create-conf.sh
-
-# Move conf to /lightningd
-if [ -f "/data/lightning.config" ]; then
-    mv /data/lightning.config /lightningd/lightning.config
-    ln -s /lightningd /root/.lightning
-    # If not is assumed that the config is already in /lightningd
+# Create config file if it doesn't exist
+if [ ! -f "/lightningd/lightning.conf" ]; then
+    /usr/local/bin/create-conf.sh
 fi
-
 
 # Wait for bitcoind to be ready
 usr/local/bin/wait-for-bitcoind.sh

@@ -1,6 +1,9 @@
 #!/bin/bash
 set -Eeuo pipefail
 
-/usr/local/bin/create-conf.sh
+# Create config file if it doesn't exist
+if [ ! -f "/etc/tor/torrc" ]; then
+    /usr/local/bin/create-conf.sh
+fi
 
 exec "$@"
