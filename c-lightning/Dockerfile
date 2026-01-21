@@ -27,13 +27,14 @@ FROM os-base AS cln-install
 ENV BITCOIND_VER="28.1"
 ENV BTC_HOST="btc_sig_miner"
 ENV FAUCET_URL="faucet"
+ENV CLNREST_PORT=3010
 COPY bitcoind-download.sh /usr/local/bin
 RUN chmod +x /usr/local/bin/bitcoind-download.sh
 RUN bitcoind-download.sh
 
 # Install c-lightning
-ENV CL_VER="25.12"
-ENV CL_PORT=39735
+ENV CLN_VER="25.12"
+ENV CLN_PORT=39735
 COPY c-lightning-download.sh /usr/local/bin
 RUN chmod +x /usr/local/bin/c-lightning-download.sh
 COPY import-keys.sh /usr/local/bin
@@ -56,7 +57,7 @@ RUN chmod +x /usr/local/bin/wait-for-bitcoind.sh
 COPY cli /usr/local/bin
 RUN chmod +x /usr/local/bin/cli
 
-EXPOSE $CL_PORT
+EXPOSE $CLN_PORT
 ENTRYPOINT ["/usr/local/bin/c-lightning-entrypoint.sh"]
 
 # Show logs from beginning and keep following

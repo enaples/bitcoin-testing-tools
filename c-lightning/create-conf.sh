@@ -5,17 +5,23 @@ bitcoin-rpcpassword=bitcoin
 bitcoin-rpcconnect=$BTC_HOST
 bitcoin-rpcport=38332
 lightning-dir=/lightningd
+rescan=0
 
-clnrest-port=3010
+clnrest-port=$CLNREST_PORT
 
 developer
-large-channel
+experimental-dual-fund
+experimental-splicing
+large-channels
+
+ignore-fee-limits=true
 log-level=debug
 log-file=/lightningd/lightningd.log
 
 # network
 tor-service-password=bitcoin
 proxy=tor:9050
-bind-addr=0.0.0.0:$CL_PORT
-addr=autotor:tor:9051/torport=$CL_PORT
+
+bind-addr=$(hostname -f):$CLN_PORT
+addr=statictor:tor:9051/torport=$CLN_PORT
 EOF
