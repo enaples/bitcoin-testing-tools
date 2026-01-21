@@ -22,6 +22,9 @@ services:
       - shared_vol_btc:/bitcoind
     depends_on:
       - tor
+    poets:
+      - 38332:38332
+      - 38333:38333
 
   electrs-romanz:
     container_name: electrs-romanz
