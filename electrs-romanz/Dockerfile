@@ -12,7 +12,9 @@ RUN DEBIAN_FRONTEND=noninteractive \
     nano curl gpg jq openssl git cargo clang cmake
 
 ARG ELECTRS_VERSION="0.9.13"
-ENV BTC_HOST="btc_sign_miner"
+ENV BTC_HOST="btc_sig_miner"
+ENV BTC_P2P_PORT=38333
+ENV BTC_RPC_PORT=38332
 RUN mkdir -p /electrum
 
 RUN cd /electrum && \
@@ -28,10 +30,11 @@ RUN cd /electrum/electrs && \
     cargo build --locked --release && \
     install -m 0755 -o root -g root -t /usr/local/bin /electrum/electrs/target/release/electrs
 
-COPY electrs /electrum
 COPY electrs-entrypoint.sh /usr/local/bin
+COPY create-conf.sh /usr/local/bin
 COPY wait-for-bitcoind.sh /usr/local/bin
 RUN chmod +x /usr/local/bin/electrs-entrypoint.sh
+RUN chmod +x /usr/local/bin/create-conf.sh
 RUN chmod +x /usr/local/bin/wait-for-bitcoind.sh
 
 EXPOSE 60601

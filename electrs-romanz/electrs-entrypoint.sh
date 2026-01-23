@@ -1,7 +1,8 @@
 #!/bin/bash
 set -Eeuo pipefail
 
-source /usr/local/bin/wait-for-bitcoind.sh
+/usr/local/bin/wait-for-bitcoind.sh
+/usr/local/bin/create-conf.sh
 
 SIG_MAGIC=`cat /bitcoind/sig_magic.txt`
 SIGNETMAGIC=true
