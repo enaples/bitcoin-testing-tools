@@ -6,7 +6,7 @@ services:
     build:
       context: tor
     image: tor_img
-    port:
+    ports:
       - "9050:9050"
       - "9051:9051"
     expose:
@@ -24,7 +24,7 @@ services:
       - SIGNETCHALLENGE=0000signetchallenge
       - SEED_NODE_URL=bitcoinmineronionaddress.onion
       - FAUCET_URL=faucetonionaddress.onion
-    port:
+    ports:
       - "38333:38333"
       - "38332:38332"
     expose:
@@ -101,3 +101,4 @@ volumes:
   shared_vol_liquid:
   shared_vol_electrs_blockstream:
   shared_vol_electrs_liquid:
+  shared_vol_esplora_bitcoin:

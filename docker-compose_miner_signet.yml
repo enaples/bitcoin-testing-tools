@@ -22,7 +22,7 @@ services:
       - shared_vol_btc:/bitcoind
     depends_on:
       - tor
-    poets:
+    ports:
       - 38332:38332
       - 38333:38333
 
@@ -35,6 +35,8 @@ services:
       - shared_vol_btc:/bitcoind
     depends_on:
       - btc_sig_miner
+    ports:
+      - 60601:60601
 
   ### Blockstream electrs (bitcoin)
   electrs-blockstream:
