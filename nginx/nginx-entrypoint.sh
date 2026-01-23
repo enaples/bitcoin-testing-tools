@@ -5,7 +5,7 @@ set -Eeuo pipefail
 /usr/local/bin/wait-for-bitcoind.sh
 
 # Create config file if it doesn't exist
-if [ ! -f "/etc/tor/torrc" ]; then
+if [ ! -f "/etc/nginx/nginx.conf" ]; then
     /usr/local/bin/create-conf.sh
 fi
 

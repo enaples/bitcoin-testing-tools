@@ -8,13 +8,13 @@ events {
 }
 
 stream {
-    upstream ${ROMANZ_ELECTRS_HOST} {
-        server ${ROMANZ_ELECTRS_HOST}:60601;
+    upstream ${ELECTRS_ROMANZ_HOST} {
+        server ${ELECTRS_ROMANZ_HOST}:60601;
     }
 
     server {
         listen 60602 ssl;
-        proxy_pass ${ROMANZ_ELECTRS_HOST};
+        proxy_pass ${ELECTRS_ROMANZ_HOST};
 
         ssl_certificate /etc/ssl/certs/nginx-selfsigned.crt;
         ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;
@@ -24,13 +24,13 @@ stream {
         ssl_prefer_server_ciphers on;
     }
 
-    upstream ${ELEMENTS_ELECTRS_HOST} {
-        server ${ELEMENTS_ELECTRS_HOST}:60701;
+    upstream ${ELECTRS_ELEMENTS_HOST} {
+        server ${ELECTRS_ELEMENTS_HOST}:60701;
     }
 
     server {
         listen 60702 ssl;
-        proxy_pass ${ELEMENTS_ELECTRS_HOST};
+        proxy_pass ${ELECTRS_ELEMENTS_HOST};
 
         ssl_certificate /etc/ssl/certs/nginx-selfsigned.crt;
         ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;
@@ -40,13 +40,13 @@ stream {
         ssl_prefer_server_ciphers on;
     }
 
-    upstream ${BLOCKSTREAM_ELECTRS_HOST} {
-        server ${BLOCKSTREAM_ELECTRS_HOST}:60501;
+    upstream ${ELECTRS_BLOCKSTREAM_HOST} {
+        server ${ELECTRS_BLOCKSTREAM_HOST}:60501;
     }
 
     server {
         listen 60502 ssl;
-        proxy_pass ${BLOCKSTREAM_ELECTRS_HOST};
+        proxy_pass ${ELECTRS_BLOCKSTREAM_HOST};
 
         ssl_certificate /etc/ssl/certs/nginx-selfsigned.crt;
         ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;
@@ -60,7 +60,7 @@ stream {
 http {
     server {
         listen 8080;
-        server_name ${BLOCKSTREAM_ELECTRS_HOST};
+        server_name ${ELECTRS_BLOCKSTREAM_HOST};
 
         # Serve the Esplora frontend (static files)
         location / {
@@ -74,7 +74,7 @@ http {
                 return 204;
             }
 
-            proxy_pass http://${BLOCKSTREAM_ELECTRS_HOST}:7070;
+            proxy_pass http://${ELECTRS_BLOCKSTREAM_HOST}:7070;
             proxy_http_version 1.1;
             proxy_set_header Upgrade \$http_upgrade;
             proxy_set_header Connection 'upgrade';
@@ -97,7 +97,7 @@ http {
             # Remove /api prefix and forward to backend
             rewrite ^/api/(.*) /\$1 break;
 
-            proxy_pass http://${BLOCKSTREAM_ELECTRS_HOST}:7070;
+            proxy_pass http://${ELECTRS_BLOCKSTREAM_HOST}:7070;
 
             proxy_http_version 1.1;
             proxy_set_header Host \$host;
@@ -114,7 +114,7 @@ http {
 
     server {
         listen 9090;
-        server_name ${ELEMENTS_ELECTRS_HOST};
+        server_name ${ELECTRS_ELEMENTS_HOST};
 
         # Serve the Esplora frontend (static files)
         location / {
@@ -128,7 +128,7 @@ http {
                 return 204;
             }
 
-            proxy_pass http://${ELEMENTS_ELECTRS_HOST}:7000;
+            proxy_pass http://${ELECTRS_ELEMENTS_HOST}:7000;
             proxy_http_version 1.1;
             proxy_set_header Upgrade \$http_upgrade;
             proxy_set_header Connection 'upgrade';
@@ -151,7 +151,7 @@ http {
             # Remove /api prefix and forward to backend
             rewrite ^/api/(.*) /\$1 break;
 
-            proxy_pass http://${ELEMENTS_ELECTRS_HOST}:7000;
+            proxy_pass http://${ELECTRS_ELEMENTS_HOST}:7000;
 
             proxy_http_version 1.1;
             proxy_set_header Host \$host;

@@ -8,9 +8,9 @@ RUN apt update && apt install -y jq && \
     mkdir -p /etc/nginx/streams-enabled
 
 ENV BTC_HOST="btc_sig_miner"
-ENV ROMANZ_ELECTRS_HOST="electrs"
-ENV ELEMENTS_ELECTRS_HOST="liquid_electrs"
-ENV BLOCKSTREAM_ELECTRS_HOST="blockstream_electrs"
+ENV ELECTRS_ROMANZ_HOST="electrs-romanz"
+ENV ELECTRS_ELEMENTS_HOST="electrs-liquid"
+ENV ELECTRS_BLOCKSTREAM_HOST="electrs-blockstream"
 COPY nginx-entrypoint.sh /usr/local/bin
 COPY create-conf.sh /usr/local/bin
 COPY wait-for-bitcoind.sh /usr/local/bin
