@@ -8,6 +8,7 @@ lightning-dir=/lightningd
 rescan=0
 
 clnrest-port=$CLNREST_PORT
+clnrest-host=0.0.0.0
 
 developer
 experimental-dual-fund

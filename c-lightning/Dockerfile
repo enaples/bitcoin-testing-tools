@@ -58,6 +58,7 @@ COPY cli /usr/local/bin
 RUN chmod +x /usr/local/bin/cli
 
 EXPOSE $CLN_PORT
+EXPOSE $CLNREST_PORT
 ENTRYPOINT ["/usr/local/bin/c-lightning-entrypoint.sh"]
 
 # Show logs from beginning and keep following

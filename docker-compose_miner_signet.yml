@@ -137,6 +137,8 @@ services:
       - shared_vol_ln:/lightningd
     environment:
       - BTC_HOST=btc_sig_miner
+    ports:
+      - 3010:3010
     depends_on:
       - btc_sig_miner
       - tor
