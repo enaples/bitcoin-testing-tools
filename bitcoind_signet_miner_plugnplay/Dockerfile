@@ -20,7 +20,7 @@ ENV WALLET="sig_miner_wallet"
 ENV POISSON=true
 COPY bitcoind-download.sh /usr/local/bin
 RUN chmod +x /usr/local/bin/bitcoind-download.sh
-RUN bitcoind-download.sh
+RUN /usr/local/bin/bitcoind-download.sh
 
 # Install runtime scripts, bash-completion and configuration files
 

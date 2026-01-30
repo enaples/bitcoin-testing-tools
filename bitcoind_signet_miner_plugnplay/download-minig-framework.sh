@@ -3,7 +3,7 @@
 # Set the GitHub repository and subfolder
 repo="bitcoin/bitcoin"
 subfolder="test/functional/test_framework"
-branch="master"
+branch="v${BITCOIND_VER}"
 
 # Set the default output directory to the current directory
 output_dir="/bitcoind"
@@ -33,13 +33,13 @@ shift $((OPTIND -1))
 
 # Download all files in the subfolder
 download_files() {
-    curl -s "https://api.github.com/repos/$repo/contents/$3" |
+    curl -s "https://api.github.com/repos/$repo/contents/$3?ref=$2" |
     jq -r '.[] | select(.type == "dir").path' |
     while read dir; do
         download_files "$repo" "$branch" "$dir" "$4"
     done
-    
-    curl -s "https://api.github.com/repos/$repo/contents/$3" |
+
+    curl -s "https://api.github.com/repos/$repo/contents/$3?ref=$2" |
     jq -r '.[] | select(.type == "file").path' |
     while read path; do
         url="https://raw.githubusercontent.com/$repo/$branch/$path"
