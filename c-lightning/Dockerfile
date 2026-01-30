@@ -33,7 +33,7 @@ RUN chmod +x /usr/local/bin/bitcoind-download.sh
 RUN bitcoind-download.sh
 
 # Install c-lightning
-ENV CLN_VER="25.12"
+ENV CLN_VER="25.12.1"
 ENV CLN_PORT=39735
 COPY c-lightning-download.sh /usr/local/bin
 RUN chmod +x /usr/local/bin/c-lightning-download.sh
