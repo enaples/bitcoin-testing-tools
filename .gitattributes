@@ -1,2 +1,7 @@
 *.sh text eol=lf
+Dockerfile text eol=lf
+bashrc text eol=lf
+cli text eol=lf
+*.conf text eol=lf
+*.env text eol=lf
 
