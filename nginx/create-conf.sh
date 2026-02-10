@@ -1,13 +1,20 @@
-cat <<- EOF > "/etc/nginx/nginx.conf"
-user www-data;
-worker_processes auto;
-pid /run/nginx.pid;
+#!/bin/bash
+set -Eeuo pipefail
 
-events {
-    worker_connections 1024;
+CONF="/etc/nginx/nginx.conf"
+
+# Check if a hostname is reachable via DNS
+is_reachable() {
+    getent hosts "$1" > /dev/null 2>&1
 }
 
-stream {
+STREAM_BLOCKS=""
+HTTP_BLOCKS=""
+
+# --- ELECTRS_ROMANZ_HOST (stream only) ---
+if is_reachable "${ELECTRS_ROMANZ_HOST}"; then
+    echo "Host ${ELECTRS_ROMANZ_HOST} is reachable, adding stream config"
+    STREAM_BLOCKS+="
     upstream ${ELECTRS_ROMANZ_HOST} {
         server ${ELECTRS_ROMANZ_HOST}:60601;
     }
@@ -23,23 +30,15 @@ stream {
         ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
         ssl_prefer_server_ciphers on;
     }
+"
+else
+    echo "Host ${ELECTRS_ROMANZ_HOST} is NOT reachable, skipping"
+fi
 
-    upstream ${ELECTRS_ELEMENTS_HOST} {
-        server ${ELECTRS_ELEMENTS_HOST}:60701;
-    }
-
-    server {
-        listen 60702 ssl;
-        proxy_pass ${ELECTRS_ELEMENTS_HOST};
-
-        ssl_certificate /etc/ssl/certs/nginx-selfsigned.crt;
-        ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;
-        ssl_session_cache shared:SSL:1m;
-        ssl_session_timeout 4h;
-        ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
-        ssl_prefer_server_ciphers on;
-    }
-
+# --- ELECTRS_BLOCKSTREAM_HOST (stream + http) ---
+if is_reachable "${ELECTRS_BLOCKSTREAM_HOST}"; then
+    echo "Host ${ELECTRS_BLOCKSTREAM_HOST} is reachable, adding stream + http config"
+    STREAM_BLOCKS+="
     upstream ${ELECTRS_BLOCKSTREAM_HOST} {
         server ${ELECTRS_BLOCKSTREAM_HOST}:60501;
     }
@@ -55,9 +54,8 @@ stream {
         ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
         ssl_prefer_server_ciphers on;
     }
-}
-
-http {
+"
+    HTTP_BLOCKS+="
     server {
         listen 8080;
         server_name ${ELECTRS_BLOCKSTREAM_HOST};
@@ -111,7 +109,32 @@ http {
             proxy_read_timeout 60s;
         }
     }
+"
+else
+    echo "Host ${ELECTRS_BLOCKSTREAM_HOST} is NOT reachable, skipping"
+fi
 
+# --- ELECTRS_ELEMENTS_HOST (stream + http) ---
+if is_reachable "${ELECTRS_ELEMENTS_HOST}"; then
+    echo "Host ${ELECTRS_ELEMENTS_HOST} is reachable, adding stream + http config"
+    STREAM_BLOCKS+="
+    upstream ${ELECTRS_ELEMENTS_HOST} {
+        server ${ELECTRS_ELEMENTS_HOST}:60701;
+    }
+
+    server {
+        listen 60702 ssl;
+        proxy_pass ${ELECTRS_ELEMENTS_HOST};
+
+        ssl_certificate /etc/ssl/certs/nginx-selfsigned.crt;
+        ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;
+        ssl_session_cache shared:SSL:1m;
+        ssl_session_timeout 4h;
+        ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
+        ssl_prefer_server_ciphers on;
+    }
+"
+    HTTP_BLOCKS+="
     server {
         listen 9090;
         server_name ${ELECTRS_ELEMENTS_HOST};
@@ -165,6 +188,34 @@ http {
             proxy_read_timeout 60s;
         }
     }
-}
+"
+else
+    echo "Host ${ELECTRS_ELEMENTS_HOST} is NOT reachable, skipping"
+fi
 
+# --- Write the final config ---
+cat > "$CONF" <<EOF
+user www-data;
+worker_processes auto;
+pid /run/nginx.pid;
+
+events {
+    worker_connections 1024;
+}
 EOF
+
+if [[ -n "$STREAM_BLOCKS" ]]; then
+    cat >> "$CONF" <<EOF
+
+stream {${STREAM_BLOCKS}}
+EOF
+fi
+
+if [[ -n "$HTTP_BLOCKS" ]]; then
+    cat >> "$CONF" <<EOF
+
+http {${HTTP_BLOCKS}}
+EOF
+fi
+
+echo "Nginx configuration written to $CONF"
