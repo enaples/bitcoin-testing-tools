@@ -1,0 +1,65 @@
+#!/bin/bash
+set -Eeuo pipefail
+
+TORRC="/etc/tor/torrc"
+
+usage() {
+    cat <<EOF
+Usage: add_hidden <service_name> <service_dir> <service_port> <target_port>
+
+Add a Tor hidden service to ${TORRC}.
+
+Arguments:
+  service_name    Hostname of the target service (e.g. nginx, cln, faucet)
+  service_dir     Directory name under /var/lib/tor/ for the hidden service keys
+  service_port    The port exposed on the .onion address
+  target_port     The port on the target service to forward traffic to
+
+Example:
+  add_hidden nginx hidden_service_electrs 60602 60602
+
+The script will:
+  1. Check that the target host is reachable via DNS
+  2. Check that the hidden service is not already configured in ${TORRC}
+  3. Append the HiddenService directives to ${TORRC}
+EOF
+    exit 0
+}
+
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+    usage
+fi
+
+if [[ $# -ne 4 ]]; then
+    echo "Error: expected 4 arguments, got $#"
+    echo "Run 'add_hidden --help' for usage information."
+    exit 1
+fi
+
+service_name="$1"
+service_dir="$2"
+service_port="$3"
+target_port="$4"
+
+# Check if the target host is reachable
+if ! nslookup "$service_name" > /dev/null 2>&1; then
+    echo "Skipping $service_name: host not reachable"
+    exit 0
+fi
+
+# Check if this hidden service is already configured
+if grep -q "HiddenServiceDir /var/lib/tor/${service_dir}/" "$TORRC" 2>/dev/null; then
+    echo "Skipping $service_dir: already configured in $TORRC"
+    exit 0
+fi
+
+# Append hidden service configuration
+cat <<- EOF >> "$TORRC"
+
+# $service_name
+HiddenServiceDir /var/lib/tor/$service_dir/
+HiddenServiceVersion 3
+HiddenServicePort $service_port $service_name:$target_port
+EOF
+
+echo "Added hidden service: $service_name ($service_dir) -> :$service_port -> $service_name:$target_port"

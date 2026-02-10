@@ -18,11 +18,15 @@ FROM os-base AS tor-service
 # Install Tor
 RUN apt-get update 
 RUN apt-get install -qq -y tor deb.torproject.org-keyring
-RUN apt-get install -y dnsutils
+RUN apt-get install -y dnsutils ntpdate
 COPY create-conf.sh /usr/local/bin
-RUN chmod +x /usr/local/bin/create-conf.sh
+COPY add_hidden /usr/local/bin
+COPY wait-for-bitcoind.sh /usr/local/bin
 COPY tor-entrypoint.sh /usr/local/bin/tor-entrypoint.sh
+RUN chmod +x /usr/local/bin/create-conf.sh
+RUN chmod +x /usr/local/bin/add_hidden
 RUN chmod +x /usr/local/bin/tor-entrypoint.sh
+RUN chmod +x /usr/local/bin/wait-for-bitcoind.sh
 
 RUN usermod -a -G debian-tor root
 
