@@ -5,7 +5,11 @@ set -Eeuo pipefail
 ntpdate -s pool.ntp.org || echo "Warning: NTP sync failed, continuing with current clock"
 
 /usr/local/bin/wait-for-bitcoind.sh
-/usr/local/bin/create-conf.sh
+
+# Create config file if it doesn't exist
+if [ ! -f "/etc/tor/torrc" ]; then
+    /usr/local/bin/create-conf.sh
+fi
 
 # Add hidden services (skips automatically if host is unreachable or already configured)
 add_hidden nginx hidden_service_electrs_romanz 60602 60602

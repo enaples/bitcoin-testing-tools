@@ -15,6 +15,9 @@ RUN wget -qO- https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512
 
 FROM os-base AS tor-service
 
+# Environmental var
+ENV BTC_HOST="btc_sig_miner"
+
 # Install Tor
 RUN apt-get update 
 RUN apt-get install -qq -y tor deb.torproject.org-keyring
@@ -29,6 +32,9 @@ RUN chmod +x /usr/local/bin/tor-entrypoint.sh
 RUN chmod +x /usr/local/bin/wait-for-bitcoind.sh
 
 RUN usermod -a -G debian-tor root
+
+# Remove tor's default config to avoid conflicts with our custom one
+RUN rm -f /etc/tor/torrc
 
 EXPOSE 9050 9051
 
