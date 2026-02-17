@@ -6,6 +6,8 @@ services:
     build:
       context: tor
     image: tor_img
+    cap_add:
+      - SYS_TIME
     port:
       - "9050:9050"
       - "9051:9051"
