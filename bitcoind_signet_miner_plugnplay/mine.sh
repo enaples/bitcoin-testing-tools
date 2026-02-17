@@ -5,11 +5,11 @@ set -Eeuo pipefail
 CLI="bitcoin-cli -datadir=/bitcoind -rpcwallet=$WALLET"
 MINER="/data/contrib/signet/miner"
 GRIND="bitcoin-util grind"
-MINING_DESC=$(cli listdescriptors | jq -r ".descriptors | .[4].desc")
+MINING_DESC=$($CLI listdescriptors | jq -r ".descriptors | .[4].desc")
 
 while echo "Start mining... ";
 do
-    CURRBLOCK=$(bitcoin-cli -datadir=/bitcoind getblockcount)
+    CURRBLOCK=$($CLI getblockcount)
     echo "Current blockcount: ${CURRBLOCK}"
     if [ $CURRBLOCK -le 100 ]; then
         $MINER --cli="$CLI" generate --grind-cmd="$GRIND" --min-nbits --descriptor=$MINING_DESC --max-blocks=101

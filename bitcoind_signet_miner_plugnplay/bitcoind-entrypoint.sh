@@ -7,7 +7,7 @@ if [ -f "/data/bitcoin.conf" ]; then
     ln -s /bitcoind /root/.
     # If not is assumed that the bitcoin.conf is already in /bitcoind
 fi
-
+CLI="bitcoin-cli -conf=/bitcoind/bitcoin.conf"
 # Check if there is already the 'signetchallenge' option in 'bitcoin.conf' different from the default
 # 'signetchallenge=00000000' added to not download any chain.
 echo "===================================="
