@@ -22,11 +22,8 @@ RUN npm install -g serve
 # Make build script executable
 RUN chmod +x build.sh
 
-# Don't build at image build time - build at container start time
-# This allows runtime configuration of FLAVOR and API_URL
-
 # Expose port
 EXPOSE $PORT
 
 # Build and serve at runtime with proper environment variables
-CMD sh -c "API_URL=http://localhost:${BACKEND_PORT} npm run dist -- ${FLAVOR} && serve dist -l ${PORT} -s"
+CMD sh -c "API_URL=\${API_URL:-http://\$(ip route | awk '/default/ {print \$3}'):${BACKEND_PORT}} && echo \"Building with API_URL=\$API_URL\" && API_URL=\$API_URL npm run dist -- ${FLAVOR} && serve dist -l ${PORT} -s"
