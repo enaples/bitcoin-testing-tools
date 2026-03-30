@@ -10,7 +10,7 @@ WORKDIR /app
 # Set default environment variables
 ENV FLAVOR="bitcoin-signet"
 ENV BACKEND_PORT=8080
-ENV PORT=9000
+ENV PORT=8000
 ENV BASE_HREF="/"
 
 # Install dependencies
