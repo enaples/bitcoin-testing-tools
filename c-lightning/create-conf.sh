@@ -6,6 +6,8 @@ bitcoin-rpcconnect=$BTC_HOST
 bitcoin-rpcport=38332
 lightning-dir=/lightningd
 rescan=0
+# Avoid fee estimation issues 
+force-feerates=300/300/300/300
 
 clnrest-port=$CLNREST_PORT
 clnrest-host=0.0.0.0
