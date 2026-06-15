@@ -32,7 +32,9 @@ COPY wait-for-bitcoind.sh /usr/local/bin
 RUN chmod +x /usr/local/bin/electrs-entrypoint.sh
 RUN chmod +x /usr/local/bin/wait-for-bitcoind.sh
 
-EXPOSE 60501
+EXPOSE $ELECTRS_ELECTRUM_RPC_PORT
+EXPOSE $ELECTRS_HTTP_PORT
+
 ENTRYPOINT ["/usr/local/bin/electrs-entrypoint.sh"]
 
 WORKDIR /root/electrs
