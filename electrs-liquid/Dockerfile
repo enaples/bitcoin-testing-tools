@@ -1,15 +1,25 @@
 ARG OS=ubuntu
-ARG OS_VER=focal
-FROM ${OS}:${OS_VER} as electrum-server
+ARG OS_VER=noble
+FROM ${OS}:${OS_VER}
 
-# Set TimeZone
-ENV TIMEZONE=Europe/Rome
 # On one elements node:
 # elements-cli -conf=/elementsd/elements.conf getblock $(elements-cli -conf=/elementsd/elements.conf getblockhash 0) 2 | jq .tx[1].vin[0].txid
 ENV CUSTOM_LIQUID_ISSUANCE_PREVOUT=""
-RUN ln -snf /usr/share/zoneinfo/$TIMEZONE /etc/localtime && echo $TIMEZONE > /etc/timezone
+ENV BTC_HOST="btc_sig_miner"
+ENV BTC_PORT="38332"
+ENV BTC_USER="bitcoin"
+ENV BTC_PASS="bitcoin"
 
-ENV EL_HOST="liquid1"
+ENV ELECTRS_DB_DIR="/electrum/db"
+ENV ELECTRS_HTTP_PORT="3030"
+ENV ELECTRS_ELECTRUM_RPC_PORT="60701"
+
+ENV ELM_HOST="liquid1"
+ENV ELM_PORT="39884"
+ENV ELM_USER="elements"
+ENV ELM_PASS="elements"
+ENV ELM_NETWORK="liquidtestnet"
+
 # Install dependencies
 RUN DEBIAN_FRONTEND=noninteractive \
     apt-get update -qq && apt-get install -qq -y \
@@ -30,18 +40,20 @@ COPY wait-for-elementsd.sh /usr/local/bin
 RUN chmod +x /usr/local/bin/electrs-entrypoint.sh
 RUN chmod +x /usr/local/bin/wait-for-elementsd.sh
 
-EXPOSE 60701
+EXPOSE $ELECTRS_ELECTRUM_RPC_PORT
+EXPOSE $ELECTRS_HTTP_PORT
+
 ENTRYPOINT ["/usr/local/bin/electrs-entrypoint.sh"]
 
 WORKDIR /root/electrs
-CMD exec electrs \
-    -vvvv \
-    --network "liquidtestnet" \
-    --daemon-rpc-addr "liquid1:39884" \
-    --parent-network "signet" \
-    --cookie "elements:elements" \
-    --db-dir "/electrum/db" \
-    --jsonrpc-import \
-    --http-addr "0.0.0.0:7000" \
-    --electrum-rpc-addr "0.0.0.0:60701" \
-    --initial-issuance-prevout "${CUSTOM_LIQUID_ISSUANCE_PREVOUT}"
+CMD ["electrs", \
+    "-vvvv", \
+    "--network", "liquidtestnet", \
+    "--parent-network", "signet", \
+    "--db-dir", "$ELECTRS_DB_DIR", \
+    "--jsonrpc-import", \
+    "--daemon-rpc-addr", "$ELM_HOST:$ELM_PORT", \
+    "--cookie", "$ELM_USER:$ELM_PASS", \
+    "--http-addr", "0.0.0.0:$ELECTRS_HTTP_PORT", \
+    "--electrum-rpc-addr", "0.0.0.0:$ELECTRS_ELECTRUM_RPC_PORT", \
+    "--initial-issuance-prevout", "$CUSTOM_LIQUID_ISSUANCE_PREVOUT"]
