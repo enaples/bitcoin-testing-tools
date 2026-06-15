@@ -1,6 +1,6 @@
 ARG OS=ubuntu
-ARG OS_VER=jammy
-FROM ${OS}:${OS_VER} as os-base
+ARG OS_VER=noble
+FROM ${OS}:${OS_VER}
 
 # Install reference: https://support.torproject.org/apt/tor-deb-repo
 

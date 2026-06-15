@@ -2,7 +2,7 @@
 set -Eeuo pipefail
 
 echo Waiting for bitcoind to mine blocks...
-until curl --silent --user bitcoin:bitcoin --data-binary '{"jsonrpc": "1.0", "id": "blockstream-electrs", "method": "getblockchaininfo", "params": []}' -H 'content-type: text/plain;' http://$BTC_HOST:38332/ | jq -e ".result.blocks > 10" > /dev/null 2>&1
+until curl --silent --user $BTC_USER:$BTC_PASS --data-binary '{"jsonrpc": "1.0", "id": "electrs-blockstream", "method": "getblockchaininfo", "params": []}' -H 'content-type: text/plain;' http://$BTC_HOST:$BTC_PORT/ | jq -e ".result.blocks > 10" > /dev/null 2>&1
 do
     echo -n "."
     sleep 1

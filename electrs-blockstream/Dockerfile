@@ -1,10 +1,16 @@
 ARG OS=ubuntu
 ARG OS_VER=focal
-FROM ${OS}:${OS_VER} as electrum-server
+FROM ${OS}:${OS_VER}
 
-# Set TimeZone
-ENV TIMEZONE=Europe/Rome
-RUN ln -snf /usr/share/zoneinfo/$TIMEZONE /etc/localtime && echo $TIMEZONE > /etc/timezone
+# Set Env variables
+ENV BTC_HOST="btc_sig_miner"
+ENV BTC_PORT="38332"
+ENV BTC_USER="bitcoin"
+ENV BTC_PASS="bitcoin"
+ENV BTC_NETWORK="signet"
+ENV ELECTRS_DB_DIR="/electrum/db"
+ENV ELECTRS_HTTP_PORT="3000"
+ENV ELECTRS_ELECTRUM_RPC_PORT="60601"
 
 # Install dependencies
 RUN DEBIAN_FRONTEND=noninteractive \
@@ -21,8 +27,6 @@ RUN cd /electrum/blockstream-electrs && \
     cargo build --locked --release && \
     install -m 0755 -o root -g root -t /usr/local/bin /electrum/blockstream-electrs/target/release/electrs
 
-ENV BTC_HOST="btc_sig_miner"
-
 COPY electrs-entrypoint.sh /usr/local/bin
 COPY wait-for-bitcoind.sh /usr/local/bin
 RUN chmod +x /usr/local/bin/electrs-entrypoint.sh
@@ -32,13 +36,13 @@ EXPOSE 60501
 ENTRYPOINT ["/usr/local/bin/electrs-entrypoint.sh"]
 
 WORKDIR /root/electrs
-CMD exec electrs \
+CMD ["sh", "-c", "exec electrs \
     -vvvv \
-    --network "signet" \
-    --daemon-rpc-addr "btc_sig_miner:38332" \
-    --cookie "bitcoin:bitcoin" \
-    --db-dir "/electrum/db" \
+    --network \"$BTC_NETWORK\" \
+    --daemon-rpc-addr \"$BTC_HOST:$BTC_PORT\" \
+    --cookie \"$BTC_USER:$BTC_PASS\" \
+    --db-dir \"$ELECTRS_DB_DIR\" \
     --jsonrpc-import \
     --address-search \
-    --http-addr "0.0.0.0:7070" \
-    --electrum-rpc-addr "0.0.0.0:60501" 
+    --http-addr \"0.0.0.0:$ELECTRS_HTTP_PORT\" \
+    --electrum-rpc-addr \"0.0.0.0:$ELECTRS_ELECTRUM_RPC_PORT\""]
