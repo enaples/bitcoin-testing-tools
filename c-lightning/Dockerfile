@@ -33,15 +33,22 @@ RUN chmod +x /usr/local/bin/bitcoind-download.sh
 RUN bitcoind-download.sh
 
 # Install c-lightning
-ENV CLN_VER="25.12.1"
+ARG CLN_VER="25.12.1"
 ENV CLN_PORT=39735
 COPY c-lightning-download.sh /usr/local/bin
 RUN chmod +x /usr/local/bin/c-lightning-download.sh
 COPY import-keys.sh /usr/local/bin
 RUN chmod +x /usr/local/bin/import-keys.sh
-RUN c-lightning-download.sh
+RUN /usr/local/bin/c-lightning-download.sh
 
 ADD https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/lightning-cli.bash-completion /usr/share/bash-completion/completions/lightning-cli
+
+# Add peerswap plugin
+ENV PEERSWAP_VER="5.0.0"
+ENV GO_VERSION="1.23.3"
+COPY peerswap-download.sh /usr/local/bin
+RUN chmod +x /usr/local/bin/peerswap-download.sh
+RUN /usr/local/bin/peerswap-download.sh
 
 # COPY lightningd /data
 COPY c-lightning-entrypoint.sh /usr/local/bin
