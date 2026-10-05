@@ -1,6 +1,6 @@
 ARG OS=ubuntu
 ARG OS_VER=noble
-FROM ${OS}:${OS_VER}
+FROM ${OS}:${OS_VER} AS os-base
 
 # Install reference: https://support.torproject.org/apt/tor-deb-repo
 
