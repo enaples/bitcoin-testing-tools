@@ -6,7 +6,7 @@ daemon_rpc_addr = "$BTC_HOST:$BTC_RPC_PORT"
 daemon_p2p_addr = "$BTC_HOST:$BTC_P2P_PORT"
 
 # Electrs settings
-electrum_rpc_addr = "$(hostname -f):60601"
+electrum_rpc_addr = "0.0.0.0:60601"
 db_dir = "/electrum/db"
 
 # Logging
