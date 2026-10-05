@@ -9,7 +9,13 @@ RUN ln -snf /usr/share/zoneinfo/$TIMEZONE /etc/localtime && echo $TIMEZONE > /et
 
 # Install dependencies
 RUN apt-get update -qq && apt-get install -qq -y \
-    nano curl gpg jq openssl git cargo clang cmake
+    nano curl gpg jq openssl git build-essential clang cmake
+
+# Install Rust via rustup (apt's cargo is too old to parse recent Cargo.lock files)
+ARG RUST_VER=1.95
+ENV PATH="/root/.cargo/bin:$PATH"
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | \
+    sh -s -- -y --default-toolchain ${RUST_VER} --profile minimal
 
 ARG ELECTRS_VERSION="0.9.13"
 ENV BTC_HOST="btc_sig_miner"

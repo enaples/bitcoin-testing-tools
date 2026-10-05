@@ -1,5 +1,5 @@
 ARG OS=ubuntu
-ARG OS_VER=focal
+ARG OS_VER=noble
 FROM ${OS}:${OS_VER}
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -15,7 +15,13 @@ ENV ELECTRS_ELECTRUM_RPC_PORT="60601"
 
 # Install dependencies
 RUN apt-get update -qq && apt-get install -qq -y \
-    nano curl gpg jq openssl git cargo clang cmake
+    nano curl gpg jq openssl git build-essential clang cmake
+
+# Install Rust via rustup (apt's cargo is too old to parse recent Cargo.lock files)
+ARG RUST_VER=1.95
+ENV PATH="/root/.cargo/bin:$PATH"
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | \
+    sh -s -- -y --default-toolchain ${RUST_VER} --profile minimal
 
 RUN mkdir -p /electrum
 
