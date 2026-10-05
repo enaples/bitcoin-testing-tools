@@ -1,10 +1,10 @@
 ARG OS=ubuntu
 ARG OS_VER=noble
 FROM ${OS}:${OS_VER}
+ARG DEBIAN_FRONTEND=noninteractive
 
 # Install dependencies
-RUN DEBIAN_FRONTEND=noninteractive \
-    apt-get update -qq && apt-get install -qq -y \
+RUN apt-get update -qq && apt-get install -qq -y \
     jq curl autoconf automake build-essential git libtool libsqlite3-dev libffi-dev \
     python3 python3-pip net-tools zlib1g-dev libsodium-dev gettext lowdown \
     valgrind libpq-dev shellcheck cppcheck libsecp256k1-dev lowdown protobuf-compiler

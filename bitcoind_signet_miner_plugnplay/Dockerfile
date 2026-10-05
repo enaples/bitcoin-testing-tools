@@ -1,14 +1,14 @@
 ARG OS=ubuntu
 ARG OS_VER=jammy
 FROM ${OS}:${OS_VER} as bitcoind-install
+ARG DEBIAN_FRONTEND=noninteractive
 
 # Set TimeZone
 ENV TIMEZONE=Europe/Rome
 RUN ln -snf /usr/share/zoneinfo/$TIMEZONE /etc/localtime && echo $TIMEZONE > /etc/timezone
 
 # Install dependencies
-RUN DEBIAN_FRONTEND=noninteractive \
-    apt-get update -qq && apt-get install -y nano  \
+RUN apt-get update -qq && apt-get install -y nano  \
     net-tools nmap bc gpg curl unzip jq bash-completion git \
     python3-pip python3-setuptools && \
     pip install argparse requests cryptography pipreqs

@@ -1,12 +1,12 @@
 ARG OS=ubuntu
 ARG OS_VER=noble
 FROM ${OS}:${OS_VER} AS os-base
+ARG DEBIAN_FRONTEND=noninteractive
 
 # Install reference: https://support.torproject.org/apt/tor-deb-repo
 
 # Install dependencies
-RUN DEBIAN_FRONTEND=noninteractive \
-    apt-get update -qq && apt-get install -qq -y apt-transport-https wget gpg jq curl
+RUN apt-get update -qq && apt-get install -qq -y apt-transport-https wget gpg jq curl
 
 COPY tor.list /etc/apt/sources.list.d
 
@@ -14,6 +14,7 @@ RUN wget -qO- https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512
     gpg --dearmor | tee /usr/share/keyrings/tor-archive-keyring.gpg >/dev/null
 
 FROM os-base AS tor-service
+ARG DEBIAN_FRONTEND=noninteractive
 
 # Environmental var
 ENV BTC_HOST="btc_sig_miner"

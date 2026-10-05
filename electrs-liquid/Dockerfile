@@ -1,6 +1,7 @@
 ARG OS=ubuntu
 ARG OS_VER=noble
 FROM ${OS}:${OS_VER}
+ARG DEBIAN_FRONTEND=noninteractive
 
 # On one elements node:
 # elements-cli -conf=/elementsd/elements.conf getblock $(elements-cli -conf=/elementsd/elements.conf getblockhash 0) 2 | jq .tx[1].vin[0].txid
@@ -21,8 +22,7 @@ ENV ELM_PASS="elements"
 ENV ELM_NETWORK="liquidtestnet"
 
 # Install dependencies
-RUN DEBIAN_FRONTEND=noninteractive \
-    apt-get update -qq && apt-get install -qq -y \
+RUN apt-get update -qq && apt-get install -qq -y \
     nano curl gpg jq openssl git cargo clang cmake
 
 RUN mkdir -p /electrum

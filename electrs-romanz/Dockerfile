@@ -1,14 +1,14 @@
 ARG OS=ubuntu
 ARG OS_VER=focal
 FROM ${OS}:${OS_VER} as electrum-server
+ARG DEBIAN_FRONTEND=noninteractive
 
 # Set TimeZone
 ENV TIMEZONE=Europe/Rome
 RUN ln -snf /usr/share/zoneinfo/$TIMEZONE /etc/localtime && echo $TIMEZONE > /etc/timezone
 
 # Install dependencies
-RUN DEBIAN_FRONTEND=noninteractive \
-    apt-get update -qq && apt-get install -qq -y \
+RUN apt-get update -qq && apt-get install -qq -y \
     nano curl gpg jq openssl git cargo clang cmake
 
 ARG ELECTRS_VERSION="0.9.13"

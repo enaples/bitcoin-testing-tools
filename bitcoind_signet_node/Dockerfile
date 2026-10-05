@@ -1,10 +1,10 @@
 ARG OS=ubuntu
 ARG OS_VER=focal
 FROM ${OS}:${OS_VER} as bitcoind-node
+ARG DEBIAN_FRONTEND=noninteractive
 
 # Install dependencies
-RUN DEBIAN_FRONTEND=noninteractive \
-    apt-get update -qq && \
+RUN apt-get update -qq && \
     apt-get -y install nano && \
     apt-get install -y bc && \
     apt-get install -yqq \

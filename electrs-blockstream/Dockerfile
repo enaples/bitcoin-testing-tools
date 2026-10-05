@@ -1,6 +1,7 @@
 ARG OS=ubuntu
 ARG OS_VER=focal
 FROM ${OS}:${OS_VER}
+ARG DEBIAN_FRONTEND=noninteractive
 
 # Set Env variables
 ENV BTC_HOST="btc_sig_miner"
@@ -13,8 +14,7 @@ ENV ELECTRS_HTTP_PORT="3000"
 ENV ELECTRS_ELECTRUM_RPC_PORT="60601"
 
 # Install dependencies
-RUN DEBIAN_FRONTEND=noninteractive \
-    apt-get update -qq && apt-get install -qq -y \
+RUN apt-get update -qq && apt-get install -qq -y \
     nano curl gpg jq openssl git cargo clang cmake
 
 RUN mkdir -p /electrum

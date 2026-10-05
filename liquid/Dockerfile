@@ -1,18 +1,19 @@
 ARG OS=ubuntu
 ARG OS_VER=jammy
 FROM ${OS}:${OS_VER} AS os-base
+ARG DEBIAN_FRONTEND=noninteractive
 
 # Set TimeZone
 # ENV TIMEZONE=Europe/Rome
 # RUN ln -snf /usr/share/zoneinfo/$TIMEZONE /etc/localtime && echo $TIMEZONE > /etc/timezone
 
 # Install dependencies
-RUN DEBIAN_FRONTEND=noninteractive \
-    apt-get update -qq && apt-get install -qq -y curl unzip jq gpg \
+RUN apt-get update -qq && apt-get install -qq -y curl unzip jq gpg \
     gpg-agent xz-utils nmap nano xxd git libtool libgmp-dev libsqlite3-dev \
     python3 python3-pip net-tools
 
 FROM os-base AS elements-install
+ARG DEBIAN_FRONTEND=noninteractive
 
 # Install c-lightning
 ENV ELEMENTSD_VER="23.3.1"
