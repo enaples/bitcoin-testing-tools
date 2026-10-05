@@ -1,10 +1,6 @@
 ARG OS=ubuntu
 ARG OS_VER=noble
-FROM ${OS}:${OS_VER} AS os-base
-
-# Set TimeZone
-ENV TIMEZONE=Europe/Rome
-RUN ln -snf /usr/share/zoneinfo/$TIMEZONE /etc/localtime && echo $TIMEZONE > /etc/timezone
+FROM ${OS}:${OS_VER}
 
 # Install dependencies
 RUN DEBIAN_FRONTEND=noninteractive \
@@ -15,12 +11,10 @@ RUN DEBIAN_FRONTEND=noninteractive \
 
 # Install Rust via rustup (newer version than apt packages)
 ENV PATH="/root/.cargo/bin:/root/.local/bin:$PATH"
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y. --profile minimal
 
 # Install uv
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
-
-FROM os-base AS cln-install
 
 # Get bitcoin-cli
 # Install bitcoind
@@ -28,13 +22,15 @@ ENV BITCOIND_VER="28.1"
 ENV BTC_HOST="btc_sig_miner"
 ENV FAUCET_URL="faucet"
 ENV CLNREST_PORT=3010
+
 COPY bitcoind-download.sh /usr/local/bin
 RUN chmod +x /usr/local/bin/bitcoind-download.sh
 RUN bitcoind-download.sh
 
 # Install c-lightning
-ARG CLN_VER="25.12.1"
+ARG CLN_VER="26.06.1"
 ENV CLN_PORT=39735
+
 COPY c-lightning-download.sh /usr/local/bin
 RUN chmod +x /usr/local/bin/c-lightning-download.sh
 COPY import-keys.sh /usr/local/bin
@@ -43,12 +39,6 @@ RUN /usr/local/bin/c-lightning-download.sh
 
 ADD https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/lightning-cli.bash-completion /usr/share/bash-completion/completions/lightning-cli
 
-# Add peerswap plugin
-ENV PEERSWAP_VER="5.0.0"
-ENV GO_VERSION="1.23.3"
-COPY peerswap-download.sh /usr/local/bin
-RUN chmod +x /usr/local/bin/peerswap-download.sh
-RUN /usr/local/bin/peerswap-download.sh
 
 # COPY lightningd /data
 COPY c-lightning-entrypoint.sh /usr/local/bin

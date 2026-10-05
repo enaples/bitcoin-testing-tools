@@ -27,8 +27,5 @@ proxy=tor:9050
 
 bind-addr=$(hostname -f):$CLN_PORT
 addr=statictor:tor:9051/torport=$CLN_PORT
-
-# Peerswap plugin
-plugin=/tmp/peerswap
-log-level=debug:plugin-peerswap
+database-upgrade=1
 EOF
