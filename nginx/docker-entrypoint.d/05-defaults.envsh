@@ -1,0 +1,15 @@
+#!/bin/sh
+# Sourced by the official nginx image's entrypoint before it renders templates.
+# Defaults for every ${VAR} used in templates/; override any of them from compose.
+# A template variable that isn't set is left unrendered, so keep this list complete.
+
+export ELECTRS_ROMANZ_HOST="${ELECTRS_ROMANZ_HOST:-electrs-romanz}"
+export ELECTRS_ROMANZ_ELECTRUM_PORT="${ELECTRS_ROMANZ_ELECTRUM_PORT:-60601}"
+
+export ELECTRS_BLOCKSTREAM_HOST="${ELECTRS_BLOCKSTREAM_HOST:-electrs-blockstream}"
+export ELECTRS_BLOCKSTREAM_ELECTRUM_PORT="${ELECTRS_BLOCKSTREAM_ELECTRUM_PORT:-60601}"
+export ELECTRS_BLOCKSTREAM_HTTP_PORT="${ELECTRS_BLOCKSTREAM_HTTP_PORT:-3000}"
+
+export ELECTRS_LIQUID_HOST="${ELECTRS_LIQUID_HOST:-electrs-liquid}"
+export ELECTRS_LIQUID_ELECTRUM_PORT="${ELECTRS_LIQUID_ELECTRUM_PORT:-60701}"
+export ELECTRS_LIQUID_HTTP_PORT="${ELECTRS_LIQUID_HTTP_PORT:-3030}"

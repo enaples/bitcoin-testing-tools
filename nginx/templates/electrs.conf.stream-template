@@ -1,0 +1,36 @@
+# Rendered into a stream {} block by the official nginx image's envsubst step at
+# container start. Only ${VARS} defined in the environment (see
+# docker-entrypoint.d/05-defaults.envsh) are substituted; nginx's own $vars stay.
+#
+# TLS termination in front of each electrs Electrum RPC port.
+
+# Backends are resolved per connection through Docker's embedded DNS, so nginx
+# starts even when a backend isn't part of the running compose file: only that
+# listener refuses connections.
+resolver 127.0.0.11 valid=10s ipv6=off;
+
+ssl_certificate     /etc/nginx/ssl/nginx-selfsigned.crt;
+ssl_certificate_key /etc/nginx/ssl/nginx-selfsigned.key;
+ssl_session_cache   shared:SSL:1m;
+ssl_session_timeout 4h;
+
+# electrs-romanz (bitcoin)
+server {
+    listen 60602 ssl;
+    set $electrs_romanz ${ELECTRS_ROMANZ_HOST}:${ELECTRS_ROMANZ_ELECTRUM_PORT};
+    proxy_pass $electrs_romanz;
+}
+
+# electrs-blockstream (bitcoin)
+server {
+    listen 60502 ssl;
+    set $electrs_blockstream ${ELECTRS_BLOCKSTREAM_HOST}:${ELECTRS_BLOCKSTREAM_ELECTRUM_PORT};
+    proxy_pass $electrs_blockstream;
+}
+
+# electrs-liquid (elements)
+server {
+    listen 60702 ssl;
+    set $electrs_liquid ${ELECTRS_LIQUID_HOST}:${ELECTRS_LIQUID_ELECTRUM_PORT};
+    proxy_pass $electrs_liquid;
+}

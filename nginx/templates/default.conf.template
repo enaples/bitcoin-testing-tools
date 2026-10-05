@@ -1,0 +1,50 @@
+# Rendered into /etc/nginx/conf.d/default.conf (inside http {}) by the official
+# nginx image's envsubst step at container start. Only ${VARS} defined in the
+# environment (see docker-entrypoint.d/05-defaults.envsh) are substituted;
+# nginx's own $vars stay.
+#
+# One port per electrs REST API. electrs serves its API at the root
+# (e.g. /blocks/tip/height); the esplora convention is /api/..., so both are
+# accepted and the /api prefix is stripped before proxying.
+
+# Backends are resolved per request through Docker's embedded DNS, so nginx
+# starts even when a backend isn't part of the running compose file.
+resolver 127.0.0.11 valid=10s ipv6=off;
+
+# Inherited by every location below. CORS: esplora and other frontends call
+# the API cross-origin.
+add_header 'Access-Control-Allow-Origin'  '*' always;
+add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS' always;
+add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range' always;
+
+proxy_http_version 1.1;
+proxy_set_header Host              $host;
+proxy_set_header X-Real-IP         $remote_addr;
+proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+proxy_set_header X-Forwarded-Proto $scheme;
+
+# electrs-blockstream (bitcoin)
+server {
+    listen 8080;
+
+    location / {
+        if ($request_method = 'OPTIONS') { return 204; }
+
+        set $electrs_blockstream http://${ELECTRS_BLOCKSTREAM_HOST}:${ELECTRS_BLOCKSTREAM_HTTP_PORT};
+        rewrite ^/api/(.*)$ /$1 break;
+        proxy_pass $electrs_blockstream;
+    }
+}
+
+# electrs-liquid (elements)
+server {
+    listen 9090;
+
+    location / {
+        if ($request_method = 'OPTIONS') { return 204; }
+
+        set $electrs_liquid http://${ELECTRS_LIQUID_HOST}:${ELECTRS_LIQUID_HTTP_PORT};
+        rewrite ^/api/(.*)$ /$1 break;
+        proxy_pass $electrs_liquid;
+    }
+}

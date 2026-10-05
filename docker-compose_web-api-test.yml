@@ -56,7 +56,7 @@ services:
     volumes:
       - shared_vol_electrs_blockstream:/electrum
     ports:
-      - 7070:7070
+      - 3000:3000
 
   electrs-liquid:
     container_name: electrs-liquid
@@ -69,18 +69,21 @@ services:
     volumes:
       - shared_vol_electrs_liquid:/electrum
     ports:
-      - 7000:7000
+      - 3030:3030
 
   nginx:
     container_name: nginx
-    build:
-      context: nginx
-    image: nginx_img
+    image: nginx:1.27
+    volumes:
+      - ./nginx/templates:/etc/nginx/templates:ro
+      - ./nginx/docker-entrypoint.d/05-defaults.envsh:/docker-entrypoint.d/05-defaults.envsh:ro
+      - ./nginx/docker-entrypoint.d/10-selfsigned-cert.sh:/docker-entrypoint.d/10-selfsigned-cert.sh:ro
     ports:
       - 60602:60602
       - 60702:60702
       - 60502:60502
       - 8080:8080
+      - 9090:9090
 
   # Bitcoin Esplora
   esplora-bitcoin:
