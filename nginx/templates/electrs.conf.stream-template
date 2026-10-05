@@ -2,8 +2,6 @@
 # container start. Only ${VARS} defined in the environment (see
 # docker-entrypoint.d/05-defaults.envsh) are substituted; nginx's own $vars stay.
 #
-# TLS termination in front of each electrs Electrum RPC port.
-
 # Backends are resolved per connection through Docker's embedded DNS, so nginx
 # starts even when a backend isn't part of the running compose file: only that
 # listener refuses connections.

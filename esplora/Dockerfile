@@ -9,7 +9,6 @@ WORKDIR /app
 
 # Set default environment variables
 ENV FLAVOR="bitcoin-signet"
-ENV BACKEND_PORT=8080
 ENV PORT=8000
 ENV BASE_HREF="/"
 
@@ -25,5 +24,8 @@ RUN chmod +x build.sh
 # Expose port
 EXPOSE $PORT
 
-# Build and serve at runtime with proper environment variables
-CMD sh -c "API_URL=\${API_URL:-http://\$(ip route | awk '/default/ {print \$3}'):${BACKEND_PORT}} && echo \"Building with API_URL=\$API_URL\" && API_URL=\$API_URL npm run dist -- ${FLAVOR} && serve dist -l ${PORT} -s"
+# Build and serve at runtime with proper environment variables.
+# API_URL defaults to ${BASE_HREF}api (i.e. /api), a path the browser resolves
+# against whatever host it reached the explorer on. nginx serves the explorer
+# and the electrs API on the same origin, so this works from any network.
+CMD sh -c "npm run dist -- ${FLAVOR} && serve dist -l ${PORT} -s"

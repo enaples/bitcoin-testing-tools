@@ -68,10 +68,7 @@ services:
       - nginx
     environment:
       - FLAVOR=bitcoin-signet
-      - BACKEND_PORT=8080
       - PORT=8000
-    ports:
-      - 8000:8000
 
   ### Mempool
   ### Images pulled are not for linux/arm/v7
