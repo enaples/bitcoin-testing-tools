@@ -14,7 +14,6 @@ clnrest-host=0.0.0.0
 
 developer
 experimental-dual-fund
-experimental-splicing
 large-channels
 
 ignore-fee-limits=true
