@@ -11,7 +11,7 @@ RUN DEBIAN_FRONTEND=noninteractive \
 
 # Install Rust via rustup (newer version than apt packages)
 ENV PATH="/root/.cargo/bin:/root/.local/bin:$PATH"
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y. --profile minimal
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal
 
 # Install uv
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
