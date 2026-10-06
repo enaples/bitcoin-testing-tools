@@ -26,5 +26,5 @@ proxy=tor:9050
 
 bind-addr=$(hostname -f):$CLN_PORT
 addr=statictor:tor:9051/torport=$CLN_PORT
-database-upgrade=1
+database-upgrade=true
 EOF
