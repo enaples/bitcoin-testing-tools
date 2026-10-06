@@ -143,6 +143,7 @@ services:
       - BTC_HOST=btc_sig_miner
     ports:
       - 3010:3010
+      - 39735:39735
     depends_on:
       - btc_sig_miner
       - tor
