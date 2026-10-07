@@ -27,4 +27,8 @@ proxy=tor:9050
 bind-addr=0.0.0.0:$CLN_PORT
 addr=statictor:tor:9051/torport=$CLN_PORT
 database-upgrade=true
+
+### LSP
+experimental-lsp-client
+experimental-lsps2-service
 EOF
