@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Signet Faucet</title>
+  <style>
+    :root {
+      --bg: #f6f5f2;
+      --card: #ffffff;
+      --text: #1d1d1f;
+      --muted: #6b6b70;
+      --border: #e3e1dc;
+      --field: #fbfaf8;
+      --accent: #f7931a;
+      --accent-text: #ffffff;
+      --accent-soft: #fdf0de;
+      --ok: #1f7a4d;
+      --ok-soft: #e5f4ec;
+      --err: #b42318;
+      --err-soft: #fdeceb;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #141416;
+        --card: #1d1d20;
+        --text: #f2f2f3;
+        --muted: #9a9aa1;
+        --border: #2e2e33;
+        --field: #17171a;
+        --accent: #f7931a;
+        --accent-text: #1b1206;
+        --accent-soft: #3a2810;
+        --ok: #5fd197;
+        --ok-soft: #15301f;
+        --err: #ff8a80;
+        --err-soft: #3a1714;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      justify-content: center;
+      padding: 48px 16px;
+    }
+    main { width: 100%; max-width: 520px; }
+    header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+    .logo {
+      width: 40px; height: 40px; border-radius: 12px;
+      background: var(--accent); color: var(--accent-text);
+      display: grid; place-items: center;
+      font-weight: 700; font-size: 22px;
+    }
+    h1 { font-size: 22px; margin: 0; line-height: 1.2; }
+    .badge {
+      margin-left: auto;
+      font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase;
+      color: var(--accent); background: var(--accent-soft);
+      padding: 4px 10px; border-radius: 999px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+    }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+    .stat { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; }
+    .stat span { display: block; font-size: 12px; color: var(--muted); }
+    .stat strong { display: block; font-size: 17px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+    label { display: block; font-weight: 600; font-size: 14px; margin-bottom: 6px; }
+    .hint { font-size: 13px; color: var(--muted); margin: 6px 0 0; }
+    input {
+      width: 100%;
+      font: inherit;
+      color: var(--text);
+      background: var(--field);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 12px;
+    }
+    input:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+    #address { font-family: var(--mono); font-size: 14px; }
+    .field { margin-bottom: 20px; }
+    .amount-row { position: relative; }
+    .amount-row input { padding-right: 52px; font-variant-numeric: tabular-nums; }
+    .unit { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 14px; pointer-events: none; }
+    .presets { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .preset {
+      font: inherit; font-size: 14px;
+      color: var(--text); background: transparent;
+      border: 1px solid var(--border); border-radius: 999px;
+      padding: 5px 14px; cursor: pointer;
+    }
+    .preset:hover { border-color: var(--accent); }
+    .preset[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); font-weight: 600; }
+    button[type="submit"] {
+      width: 100%;
+      font: inherit; font-weight: 600;
+      color: var(--accent-text); background: var(--accent);
+      border: 0; border-radius: 10px;
+      padding: 12px; cursor: pointer;
+    }
+    button[type="submit"]:hover { filter: brightness(1.05); }
+    button[type="submit"]:disabled { opacity: .6; cursor: progress; }
+    .alert { border-radius: 12px; padding: 14px 16px; margin-bottom: 16px; font-size: 15px; }
+    .alert.ok { background: var(--ok-soft); color: var(--ok); }
+    .alert.err { background: var(--err-soft); color: var(--err); }
+    .alert p { margin: 0; }
+    .alert .detail { color: var(--text); margin-top: 10px; font-size: 13px; }
+    .alert .detail span { color: var(--muted); display: block; }
+    .txid { display: flex; gap: 8px; align-items: center; margin-top: 2px; }
+    code { font-family: var(--mono); font-size: 13px; overflow-wrap: anywhere; }
+    .copy {
+      flex: none; font: inherit; font-size: 12px;
+      color: var(--text); background: var(--card);
+      border: 1px solid var(--border); border-radius: 8px;
+      padding: 3px 10px; cursor: pointer;
+    }
+    details { margin-top: 16px; font-size: 14px; color: var(--muted); }
+    summary { cursor: pointer; }
+    details code { display: block; margin-top: 8px; padding: 10px 12px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); }
+    @media (max-width: 420px) {
+      body { padding-top: 24px; }
+      .card { padding: 18px; }
+      .stats { grid-template-columns: 1fr 1fr; gap: 8px; }
+      .stat:first-child { grid-column: 1 / -1; }
+      .stat { padding: 10px 12px; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="logo" aria-hidden="true">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5c-.3 0-.6.2-.8.4C9.6 5 5.5 10.2 5.5 14a6.5 6.5 0 0 0 13 0c0-3.8-4.1-9-5.7-11.1-.2-.2-.5-.4-.8-.4Zm-3 11.8c.4 0 .8.3.8.8 0 1.1.9 2 2 2 .5 0 .8.4.8.8s-.3.8-.8.8a3.6 3.6 0 0 1-3.6-3.6c0-.5.4-.8.8-.8Z"/></svg>
+    </div>
+    <h1>Signet Faucet</h1>
+    <span class="badge">signet</span>
+  </header>
+
+  <section class="stats" aria-label="Faucet status">
+    <div class="stat"><span>Faucet balance</span><strong>{{ balance ~ " BTC" if balance is not none else "—" }}</strong></div>
+    <div class="stat"><span>Block height</span><strong>{{ "{:,}".format(height) if height is not none else "—" }}</strong></div>
+    <div class="stat"><span>Max per request</span><strong>{{ max_amount }} BTC</strong></div>
+  </section>
+
+  <div aria-live="polite">
+    {% if sent %}
+    <div class="alert ok">
+      <p><strong>Sent {{ sent.amount }} BTC.</strong> It confirms with the next block.</p>
+      <div class="detail">
+        <span>To</span><code>{{ sent.address }}</code>
+      </div>
+      <div class="detail">
+        <span>Transaction</span>
+        <div class="txid"><code id="txid">{{ sent.txid }}</code><button type="button" class="copy" data-copy="txid" hidden>Copy</button></div>
+      </div>
+    </div>
+    {% endif %}
+    {% if error %}
+    <div class="alert err"><p>{{ error }}</p></div>
+    {% endif %}
+  </div>
+
+  <form class="card" method="post" action="/">
+    <div class="field">
+      <label for="address">Signet address</label>
+      <input id="address" name="address" value="{{ address or "" }}" placeholder="tb1q… or tb1p…"
+             autocomplete="off" autocapitalize="off" spellcheck="false" required>
+    </div>
+    <div class="field">
+      <label for="amount">Amount</label>
+      <div class="amount-row">
+        <input id="amount" name="amount" type="number" inputmode="decimal"
+               min="{{ min_amount }}" max="{{ max_amount }}" step="0.00000001"
+               value="{{ amount or "1" }}" required>
+        <span class="unit">BTC</span>
+      </div>
+      <div class="presets" hidden>
+        {% for preset in presets %}
+        <button type="button" class="preset" data-amount="{{ preset }}" aria-pressed="false">{{ preset }}</button>
+        {% endfor %}
+      </div>
+      <p class="hint">Between {{ min_amount }} and {{ max_amount }} BTC.</p>
+    </div>
+    <button type="submit">Send coins</button>
+  </form>
+
+  <details>
+    <summary>Funding from a script</summary>
+    <code>curl "{{ request.host_url }}faucet?address=&lt;address&gt;"</code>
+    <p>Sends {{ legacy_amount }} BTC and answers <code style="display:inline;padding:0;border:0;background:none">Success</code>.</p>
+  </details>
+</main>
+
+<script>
+  // Everything works without JavaScript; this only adds the preset buttons,
+  // copy-to-clipboard and a sending state on the submit button.
+  const amount = document.getElementById("amount");
+  const presets = document.querySelector(".presets");
+  presets.hidden = false;
+  const markPreset = () => presets.querySelectorAll(".preset").forEach(b => {
+    b.setAttribute("aria-pressed", String(Number(b.dataset.amount) === Number(amount.value)));
+  });
+  presets.addEventListener("click", e => {
+    const button = e.target.closest(".preset");
+    if (!button) return;
+    amount.value = button.dataset.amount;
+    markPreset();
+  });
+  amount.addEventListener("input", markPreset);
+  markPreset();
+
+  document.querySelectorAll("[data-copy]").forEach(button => {
+    if (!navigator.clipboard) return;
+    button.hidden = false;
+    button.addEventListener("click", async () => {
+      await navigator.clipboard.writeText(document.getElementById(button.dataset.copy).textContent);
+      button.textContent = "Copied";
+      setTimeout(() => { button.textContent = "Copy"; }, 1500);
+    });
+  });
+
+  document.querySelector("form").addEventListener("submit", e => {
+    const button = e.target.querySelector("button[type=submit]");
+    button.disabled = true;
+    button.textContent = "Sending…";
+  });
+</script>
+</body>
+</html>

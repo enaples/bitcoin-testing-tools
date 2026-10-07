@@ -137,6 +137,8 @@ services:
     image: faucet
     environment:
       - BTC_HOST=btc_sig_miner
+      # Largest amount the web page lets users request (/faucet always sends 1.5 BTC)
+      - FAUCET_MAX_AMOUNT=10
     depends_on:
       btc_sig_miner:
         condition: service_healthy

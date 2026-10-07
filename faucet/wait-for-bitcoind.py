@@ -29,4 +29,4 @@ while True:
         time.sleep(1)
 
 if __name__ == '__main__':
-    api.run(debug=True, host="0.0.0.0")
+    api.run(host="0.0.0.0")
