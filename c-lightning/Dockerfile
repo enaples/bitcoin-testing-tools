@@ -97,6 +97,16 @@ ADD https://raw.githubusercontent.com/ElementsProject/lightning/v${CLN_VER}/cont
 RUN echo 'alias lightning-cli="lightning-cli --lightning-dir=/lightningd"' >> /root/.bashrc && \
     echo '[[ $PS1 && -f /usr/share/bash-completion/bash_completion ]] && . /usr/share/bash-completion/bash_completion' >> /root/.bashrc
 
+# LSPS2 policy plugin: uv runs it, its deps (and Python) are installed now
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+COPY --chmod=755 lsps2_policy.py /usr/local/lib/cln-plugins/lsps2_policy.py
+RUN uv sync --script /usr/local/lib/cln-plugins/lsps2_policy.py
+
+# Fail the build if lightningd could not start the plugin
+RUN printf '{"jsonrpc":"2.0","id":1,"method":"getmanifest","params":{}}\n\n' \
+    | LIGHTNINGD_PLUGIN=1 /usr/local/lib/cln-plugins/lsps2_policy.py \
+    | grep -q lsps2-policy-getpolicy
+
 ENV BTC_HOST="btc_sig_miner"
 ENV FAUCET_URL="faucet"
 ENV CLNREST_PORT=3010
