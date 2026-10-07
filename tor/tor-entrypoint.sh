@@ -15,6 +15,7 @@ fi
 add_hidden nginx hidden_service_electrs_romanz 60602 60602
 add_hidden nginx hidden_service_electrs_blockstream 60502 60502
 add_hidden cln hidden_service_cl_rest 8080 3010
+add_hidden cln2 hidden_service_cl2_rest 8080 3011
 add_hidden faucet hidden_service_faucet 5050 5000
 
 exec "$@"

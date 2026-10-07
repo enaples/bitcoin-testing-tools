@@ -87,6 +87,9 @@ services:
       - 8080:8080
       - 9090:9090
 
+  # Core Lightning nodes: same image, each with its own data volume and ports.
+  # CLN_PORT and CLNREST_PORT are written into lightning.conf on the node's first
+  # start, so the container and host ports are kept identical.
   cln:
     container_name: cln
     build:
@@ -96,9 +99,31 @@ services:
       - shared_vol_ln:/lightningd
     environment:
       - BTC_HOST=btc_sig_miner
+      - CLN_PORT=39735
+      - CLNREST_PORT=3010
     ports:
-      - 3010:3010
       - 39735:39735
+      - 3010:3010
+    depends_on:
+      btc_sig_miner:
+        condition: service_healthy
+      tor:
+        condition: service_started
+
+  cln2:
+    container_name: cln2
+    build:
+      context: c-lightning
+    image: c-lightning
+    volumes:
+      - shared_vol_ln2:/lightningd
+    environment:
+      - BTC_HOST=btc_sig_miner
+      - CLN_PORT=39736
+      - CLNREST_PORT=3011
+    ports:
+      - 39736:39736
+      - 3011:3011
     depends_on:
       btc_sig_miner:
         condition: service_healthy
@@ -123,6 +148,7 @@ services:
 volumes:
   shared_vol_btc:
   shared_vol_ln:
+  shared_vol_ln2:
   shared_vol_mempool_db:
   shared_vol_mempool_api:
   shared_vol_electrs_blockstream:
