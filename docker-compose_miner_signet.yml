@@ -147,6 +147,37 @@ services:
     ports:
       - 5000:5000
 
+  gl-testserver:
+    container_name: gl-testserver
+    build:
+      context: gl-testserver
+    image: gl-testserver
+    platform: linux/amd64
+    init: true
+    sysctls:
+      - net.ipv4.ip_local_port_range=40000 40199
+      # Let outgoing connections (one per bitcoind RPC call) reuse ports
+      # in TIME_WAIT instead of draining the small range above
+      - net.ipv4.tcp_tw_reuse=1
+    environment:
+      - GL_TESTSERVER_BITCOIND_RPC=http://bitcoin:bitcoin@btc_sig_miner:38332
+      # Address clients use to reach this machine; it goes into the
+      # node URIs and the TLS certificates
+      - GL_TESTING_ADVERTISE_HOST=${GL_ADVERTISE_HOST:0.0.0.0}
+      - GL_TESTING_BIND_HOST=0.0.0.0
+      - GL_TESTING_SCHEDULER_PORT=2601
+    ports:
+      - 2601:2601
+      - 40000-40199:40000-40199
+    volumes:
+      - ./gl-testserver/data:/data
+      - shared_vol_gl_clnvm:/opt/clnvm
+    depends_on:
+      btc_sig_miner:
+        condition: service_healthy
+      cln:
+        condition: service_started
+
 volumes:
   shared_vol_btc:
   shared_vol_ln:
@@ -155,6 +186,7 @@ volumes:
   shared_vol_mempool_api:
   shared_vol_electrs_blockstream:
   shared_vol_esplora_bitcoin:
+  shared_vol_gl_clnvm:
 
 networks:
   btc-testing-tools:
