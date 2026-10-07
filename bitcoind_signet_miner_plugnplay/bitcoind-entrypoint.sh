@@ -1,13 +1,15 @@
 #!/bin/bash
 set -Eeuo pipefail
 
-# Move bitcoin.conf to /bitcoind
-if [ -f "/data/bitcoin.conf" ]; then
-    mv /data/bitcoin.conf /bitcoind/bitcoin.conf
-    ln -s /bitcoind /root/.
-    # If not is assumed that the bitcoin.conf is already in /bitcoind
+# Copy the template bitcoin.conf to /bitcoind on the first run only: afterwards the
+# volume's copy holds this chain's signetchallenge and must not be overwritten
+# (every new container, e.g. after a rebuild, still has the template in /data)
+if [ ! -f "/bitcoind/bitcoin.conf" ]; then
+    cp /data/bitcoin.conf /bitcoind/bitcoin.conf
 fi
+ln -sfn /bitcoind /root/bitcoind
 CLI="bitcoin-cli -conf=/bitcoind/bitcoin.conf"
+WALLETFILE="${WALLET}_privkey.txt"
 # Check if there is already the 'signetchallenge' option in 'bitcoin.conf' different from the default
 # 'signetchallenge=00000000' added to not download any chain.
 echo "===================================="
@@ -28,8 +30,8 @@ if [ $SIGNETCHALLENGE = false ]; then
     # Create a new signetchallenge
     # Start bitcoind
     echo "Starting bitcoind..."
-    bitcoind -datadir=/bitcoind -daemon 2>&1 > /dev/null
-    
+    bitcoind -datadir=/bitcoind -daemonwait > /dev/null
+
     # Wait for bitcoind startup
     until bitcoin-cli -datadir=/bitcoind -rpcwait getblockchaininfo  > /dev/null 2>&1
     do
@@ -51,22 +53,24 @@ if [ $SIGNETCHALLENGE = false ]; then
     
     
     # Dumping descriptor wallet privatekey
-    WALLETFILE="${WALLET}_privkey.txt"
     bitcoin-cli -datadir=/bitcoind listdescriptors true | jq -r ".descriptors | .[].desc" >> "/bitcoind/${WALLETFILE}"
     
-    # Wait for bitcoind shutdown
+    # Wait for bitcoind shutdown: `stop` returns before bitcoind has finished writing
+    # its files, so wait for the process to exit before removing them
     echo "Waiting for bitcoind to stop."
-    bitcoin-cli -datadir=/bitcoind stop &
-    wait
+    BITCOIND_PID=$(cat /bitcoind/signet/bitcoind.pid)
+    bitcoin-cli -datadir=/bitcoind stop
+    while kill -0 "$BITCOIND_PID" 2>/dev/null; do
+        sleep 0.5
+    done
     echo "bitcoind stopped."
     # Removing any downloaded timechain
-    rm -rf /bitcoind/signet/ &
-    wait
+    rm -rf /bitcoind/signet/
 fi
 
 # Start bitcoind
 echo "Restarting bitcoind..."
-bitcoind -datadir=/bitcoind -daemon
+bitcoind -datadir=/bitcoind -daemonwait
 
 # Wait for bitcoind startup
 until bitcoin-cli -datadir=/bitcoind -rpcwait getblockchaininfo  > /dev/null 2>&1
@@ -119,7 +123,6 @@ else
     # just load the existing wallet:
     echo "================================================"
     echo "Loading the main wallet:"
-    WALLET="sig_miner_wallet"
     bitcoin-cli -datadir=/bitcoind loadwallet "$WALLET" 2>&1 >/dev/null
     echo "Bitcoin core wallet \"$WALLET\" loaded."
     echo "================================================"

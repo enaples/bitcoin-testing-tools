@@ -1,61 +1,52 @@
-ARG OS=ubuntu
-ARG OS_VER=jammy
-FROM ${OS}:${OS_VER} as bitcoind-install
+# syntax=docker/dockerfile:1
+ARG OS_VER=noble
+ARG BITCOIND_VER=28.1
 ARG DEBIAN_FRONTEND=noninteractive
 
-# Set TimeZone
-ENV TIMEZONE=Europe/Rome
-RUN ln -snf /usr/share/zoneinfo/$TIMEZONE /etc/localtime && echo $TIMEZONE > /etc/timezone
+##################################
+### Building Stage: Bitcoin Core binaries, signet miner and bash completions
+##################################
+FROM ubuntu:${OS_VER} AS bitcoin
+ARG TARGETARCH
+ARG BITCOIND_VER
+ARG DEBIAN_FRONTEND
+RUN apt-get update -qq && apt-get install -qq -y --no-install-recommends curl ca-certificates
+COPY --chmod=755 bitcoind-download.sh /usr/local/bin/
+RUN bitcoind-download.sh
 
-# Install dependencies
-RUN apt-get update -qq && apt-get install -y nano  \
-    net-tools nmap bc gpg curl unzip jq bash-completion git \
-    python3-pip python3-setuptools && \
-    pip install argparse requests cryptography pipreqs
+##################################
+### Final runtime image
+##################################
+FROM ubuntu:${OS_VER}
+ARG DEBIAN_FRONTEND
+# python3 runs the signet miner (standard library only), jq is used by the scripts
+RUN apt-get update -qq && apt-get install -qq -y --no-install-recommends \
+    python3 jq bash-completion tzdata \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install bitcoind
-ENV BITCOIND_VER="24.0.1"
+ENV TZ=Europe/Rome
 ENV BLOCK_MINING_SEC=600
 ENV WALLET="sig_miner_wallet"
 ENV POISSON=true
-COPY bitcoind-download.sh /usr/local/bin
-RUN chmod +x /usr/local/bin/bitcoind-download.sh
-RUN /usr/local/bin/bitcoind-download.sh
 
-# Install runtime scripts, bash-completion and configuration files
+COPY --from=bitcoin /out/ /
 
-# bash completion for bitcoind and bitcoin-cli
-ENV GH_URL=https://raw.githubusercontent.com/bitcoin/bitcoin/master
-ENV BC=/usr/share/bash-completion/completions
-ADD $GH_URL/contrib/completions/bash/bitcoin-cli.bash $BC/bitcoin-cli
-ADD $GH_URL/contrib/completions/bash/bitcoind.bash $BC/bitcoind
-ADD $GH_URL/contrib/completions/bash/bitcoin-tx.bash $BC/bitcoin-tx
+# Fail the build if bitcoind or the miner's python imports are broken
+RUN bitcoind -version | head -1 && /data/contrib/signet/miner --help > /dev/null
 
 # Copy bitcoind configuration directory
 COPY bitcoind /data
-
-# Copy support scripts
-# TODO: download the mining framework always from a verified branch avoiding master due to code changes
-COPY download-minig-framework.sh /usr/local/bin
-RUN chmod +x /usr/local/bin/download-minig-framework.sh
-RUN download-minig-framework.sh -s "test/functional/test_framework" -d "/data"
-RUN download-minig-framework.sh -s "contrib/signet" -d "/data"
-RUN pipreqs /data/test/functional/test_framework
-RUN pip install -r /data/test/functional/test_framework/requirements.txt
-
-COPY cli /usr/local/bin
 COPY bashrc /root/.bashrc
+COPY --chmod=755 cli bitcoind-entrypoint.sh mine.sh /usr/local/bin/
 
-COPY bitcoind-entrypoint.sh /usr/local/bin
-COPY mine.sh /usr/local/bin
-RUN chmod +x /usr/local/bin/cli
-RUN chmod +x /usr/local/bin/bitcoind-entrypoint.sh
-RUN chmod +x /usr/local/bin/mine.sh
-RUN chmod +x /data/contrib/signet/miner
+# Healthy once bitcoind answers and the first 101 blocks are mined, so the
+# coinbase outputs are spendable. The long start period covers slow hardware.
+HEALTHCHECK --interval=10s --timeout=5s --start-period=30m \
+    CMD [ "$(bitcoin-cli -datadir=/bitcoind getblockcount)" -gt 100 ] || exit 1
 
 # bitcoind P2P
 EXPOSE 38333/tcp
-# bitcoind regtest RPC
+# bitcoind signet RPC
 EXPOSE 38332/tcp
 # zmqpubrawblock
 EXPOSE 28332/tcp
@@ -67,4 +58,3 @@ ENTRYPOINT ["/usr/local/bin/bitcoind-entrypoint.sh"]
 
 # Start mining on custom signet
 CMD ["/usr/local/bin/mine.sh"]
-
