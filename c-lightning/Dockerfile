@@ -93,10 +93,6 @@ COPY --from=cln /out/ /
 # Fail the build if any runtime library is missing
 RUN lightningd --version && bitcoin-cli --version | head -1
 
-ADD https://raw.githubusercontent.com/ElementsProject/lightning/v${CLN_VER}/contrib/lightning-cli.bash-completion /usr/share/bash-completion/completions/lightning-cli
-RUN echo 'alias lightning-cli="lightning-cli --lightning-dir=/lightningd"' >> /root/.bashrc && \
-    echo '[[ $PS1 && -f /usr/share/bash-completion/bash_completion ]] && . /usr/share/bash-completion/bash_completion' >> /root/.bashrc
-
 # LSPS2 policy plugin: uv runs it, its deps (and Python) are installed now
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 COPY --chmod=755 lsps2_policy.py /usr/local/lib/cln-plugins/lsps2_policy.py
