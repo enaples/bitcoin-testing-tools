@@ -24,7 +24,6 @@ services:
       - shared_vol_btc:/bitcoind
     depends_on:
       - tor
-    # Time for mine.sh to stop the miner and shut bitcoind down cleanly
     stop_grace_period: 1m
     ports:
       - 38332:38332
@@ -43,7 +42,7 @@ services:
     ports:
       - 60601:60601
 
-  ### Blockstream electrs (bitcoin)
+  # Blockstream electrs (bitcoin)
   electrs-blockstream:
     container_name: electrs-blockstream
     build:
@@ -56,7 +55,6 @@ services:
         condition: service_healthy
     ports:
       - 3000:3000
-      # 60601 on the host is taken by electrs-romanz
       - 60501:60601
 
   # Bitcoin Esplora
@@ -87,9 +85,6 @@ services:
       - 8080:8080
       - 9090:9090
 
-  # Core Lightning nodes: same image, each with its own data volume and ports.
-  # CLN_PORT and CLNREST_PORT are written into lightning.conf on the node's first
-  # start, so the container and host ports are kept identical.
   cln:
     container_name: cln
     build:
@@ -137,7 +132,6 @@ services:
     image: faucet
     environment:
       - BTC_HOST=btc_sig_miner
-      # Largest amount the web page lets users request (/faucet always sends 1.5 BTC)
       - FAUCET_MAX_AMOUNT=10
     depends_on:
       btc_sig_miner:
@@ -156,14 +150,10 @@ services:
     init: true
     sysctls:
       - net.ipv4.ip_local_port_range=40000 40199
-      # Let outgoing connections (one per bitcoind RPC call) reuse ports
-      # in TIME_WAIT instead of draining the small range above
       - net.ipv4.tcp_tw_reuse=1
     environment:
       - GL_TESTSERVER_BITCOIND_RPC=http://bitcoin:bitcoin@btc_sig_miner:38332
-      # Address clients use to reach this machine; it goes into the
-      # node URIs and the TLS certificates
-      - GL_TESTING_ADVERTISE_HOST=${GL_ADVERTISE_HOST:0.0.0.0}
+      - GL_TESTING_ADVERTISE_HOST=${GL_ADVERTISE_HOST:-0.0.0.0}
       - GL_TESTING_BIND_HOST=0.0.0.0
       - GL_TESTING_SCHEDULER_PORT=2601
     ports:
