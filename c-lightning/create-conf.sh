@@ -24,7 +24,7 @@ log-file=/lightningd/lightningd.log
 tor-service-password=bitcoin
 proxy=tor:9050
 
-bind-addr=0.0.0.0:$CLN_PORT
+bind-addr=$(hostname -f):$CLN_PORT
 addr=statictor:tor:9051/torport=$CLN_PORT
 database-upgrade=true
 
