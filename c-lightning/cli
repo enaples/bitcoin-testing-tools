@@ -2,4 +2,4 @@
 #
 # Helper script used as an alias for lightning-cli with the necessary arguments
 #
-/usr/local/bin/lightning-cli --conf=/lightningd/lightning.conf "$@"
+/usr/bin/lightning-cli --conf=/lightningd/lightning.conf "$@"
