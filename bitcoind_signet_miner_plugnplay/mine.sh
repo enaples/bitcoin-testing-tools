@@ -15,6 +15,29 @@ BITCOIND_PIDFILE="/bitcoind/signet/bitcoind.pid"
 # Block rewards go to the wallet's external taproot descriptor
 MINING_DESC=$($CLI listdescriptors | jq -r '.descriptors[] | select(.internal == false and (.desc | startswith("tr("))) | .desc')
 
+# Fee rates (sat/vB) of the self-payments sent before every block (fixed mode)
+# or after every new block (Poisson mode). Otherwise only coinbases get mined,
+# estimatesmartfee has no data and Core Lightning refuses incoming channels
+# ("feerates unknown").
+# Set FEE_TX_RATES="" to disable.
+# In the first 2 blocks after the first 101, you'll see a few "Insufficient funds" 
+# failures, because only one coin is spendable yet.
+FEE_TX_RATES=${FEE_TX_RATES-1 2 5}
+FEE_TX_ADDR=""
+
+send_fee_txs() {
+    local rate
+    if [ -z "$FEE_TX_ADDR" ]; then
+        FEE_TX_ADDR=$($CLI getnewaddress) || return 0
+    fi
+    for rate in $FEE_TX_RATES; do
+        # minconf=1: the estimator ignores transactions with unconfirmed parents
+        $CLI -named send outputs="{\"$FEE_TX_ADDR\": 0.0001}" fee_rate="$rate" \
+            options='{"minconf": 1}' > /dev/null || \
+            echo "Failed to send a ${rate} sat/vB fee transaction"
+    done
+}
+
 # Mine the first 101 blocks back-to-back so the first coinbase outputs are spendable
 bootstrap() {
     local blocks
@@ -30,11 +53,26 @@ mine_poisson() {
     $MINER --cli="$CLI" generate --grind-cmd="$GRIND" --min-nbits --descriptor="$MINING_DESC" --poisson --ongoing
 }
 
+# Poisson mode: the miner picks the block times, so check every 10s for a new
+# block and send the fee transactions after it. Skipped until the first
+# coinbase is spendable (block 101).
+poll_fee_txs() {
+    local height last_height=""
+    while true; do
+        height=$($CLI getblockcount 2>/dev/null) || height=""
+        if [ -n "$height" ] && [ "$height" -gt 100 ] && [ "$height" != "$last_height" ]; then
+            send_fee_txs
+            last_height=$height
+        fi
+        sleep 10
+    done
+}
+
 mine_fixed() {
     echo "Mining a block every ${BLOCK_MINING_SEC}s..."
     while true; do
         START=$(date +%s)
-        # One block timestamped now (the miner requires a target even if it doesn't schedule here)
+        send_fee_txs
         $MINER --cli="$CLI" generate --grind-cmd="$GRIND" --min-nbits --descriptor="$MINING_DESC" --set-block-time=-1 || \
             echo "Failed to mine a block, retrying in ${BLOCK_MINING_SEC}s"
         ELAPSED=$(( $(date +%s) - START ))
@@ -57,6 +95,9 @@ mine() {
 # before the container gets killed
 shutdown() {
     trap - TERM INT
+    if [ -n "${FEE_POLLER_PID:-}" ]; then
+        kill "$FEE_POLLER_PID" 2>/dev/null || true
+    fi
     kill "$MINER_PID" 2>/dev/null || true
     wait "$MINER_PID" 2>/dev/null || true
     # As PID 1 this script inherits the miner process left behind by the subshell
@@ -76,6 +117,10 @@ trap shutdown TERM INT
 # returns, while `wait` is interrupted by the signal straight away
 mine &
 MINER_PID=$!
+if [ "$POISSON" = true ]; then
+    poll_fee_txs &
+    FEE_POLLER_PID=$!
+fi
 STATUS=0
 wait "$MINER_PID" || STATUS=$?
 echo "Miner exited with status ${STATUS}"
