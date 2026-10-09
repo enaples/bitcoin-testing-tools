@@ -86,8 +86,12 @@ ENV PATH=/opt/venv/bin:$PATH \
     RUST_PROFILE=release \
     CLNVM_CACHE_DIR=/opt/clnvm
 
-COPY entrypoint.sh /usr/local/bin/gl-testserver-entrypoint.sh
-ENTRYPOINT ["/usr/local/bin/gl-testserver-entrypoint.sh"]
+# The scheduler keeps its nodes in memory, so every start is a fresh server:
+# drop the previous certificates instead of handing out stale ones.
+# Settings come from the environment (see the compose service):
+#   GL_TESTSERVER_BITCOIND_RPC, GL_TESTING_ADVERTISE_HOST,
+#   GL_TESTING_BIND_HOST, GL_TESTING_SCHEDULER_PORT
+ENTRYPOINT ["sh", "-c", "rm -rf /data/gl-testserver /data/client.env && exec gltestserver run --directory /data \"$@\"", "--"]
 
 HEALTHCHECK --interval=10s --timeout=5s --start-period=30m \
   CMD test -f /data/client.env
