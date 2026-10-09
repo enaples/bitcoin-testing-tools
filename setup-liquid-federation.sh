@@ -26,6 +26,16 @@ fi
 # ============================================================================
 echo "=== Liquid Federation Setup (Signed Blocks) ==="
 
+# Step 0: Ensure Liquid image is available, fall back to Blockstream's elements image
+echo "Step 0: Checking Liquid image..."
+if ! docker image inspect $LIQUID_IMAGE > /dev/null 2>&1; then
+    FALLBACK_IMAGE="blockstream/elements:latest"
+    echo "  Image $LIQUID_IMAGE not found locally, pulling $FALLBACK_IMAGE..."
+    docker pull $FALLBACK_IMAGE
+    LIQUID_IMAGE=$FALLBACK_IMAGE
+fi
+echo "  Using image: $LIQUID_IMAGE"
+
 # Step 1: Extract Bitcoin parameters
 echo "Step 1: Extracting Bitcoin signet parameters..."
 SIGNETCHALLENGE=$(docker exec $BTC_CONTAINER grep "signetchallenge=" /bitcoind/bitcoin.conf | cut -d'=' -f2)

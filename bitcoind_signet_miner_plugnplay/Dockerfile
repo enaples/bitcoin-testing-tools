@@ -25,7 +25,6 @@ RUN apt-get update -qq && apt-get install -qq -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 ENV TZ=Europe/Rome
-ENV BLOCK_MINING_SEC=600
 ENV WALLET="sig_miner_wallet"
 ENV POISSON=true
 

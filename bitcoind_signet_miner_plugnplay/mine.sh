@@ -1,11 +1,12 @@
 #!/bin/bash
 set -Eeuo pipefail
 
-# Mining modes:
-#   POISSON=true   random block intervals, 10 minutes on average (upstream signet miner)
-#   POISSON=false  one block every BLOCK_MINING_SEC seconds. Signet retargets the
-#                  difficulty every 2016 blocks towards 10 minutes, so shorter
-#                  intervals only hold until the difficulty catches up.
+# Mining modes (upstream signet miner, minimum difficulty):
+#   POISSON=true   random block intervals, 10 minutes on average
+#   POISSON=false  one block every 10 minutes
+# Faster blocks are not possible: signet retargets the difficulty every 2016
+# blocks towards 10 minutes, and bitcoin-util grind would end up using every
+# CPU core to keep up.
 
 CLI="bitcoin-cli -datadir=/bitcoind -rpcwallet=$WALLET"
 MINER="/data/contrib/signet/miner"
@@ -15,8 +16,7 @@ BITCOIND_PIDFILE="/bitcoind/signet/bitcoind.pid"
 # Block rewards go to the wallet's external taproot descriptor
 MINING_DESC=$($CLI listdescriptors | jq -r '.descriptors[] | select(.internal == false and (.desc | startswith("tr("))) | .desc')
 
-# Fee rates (sat/vB) of the self-payments sent before every block (fixed mode)
-# or after every new block (Poisson mode). Otherwise only coinbases get mined,
+# Fee rates (sat/vB) of the self-payments sent after every new block. Otherwise only coinbases get mined,
 # estimatesmartfee has no data and Core Lightning refuses incoming channels
 # ("feerates unknown").
 # Set FEE_TX_RATES="" to disable.
@@ -48,12 +48,7 @@ bootstrap() {
     fi
 }
 
-mine_poisson() {
-    echo "Mining with Poisson distribution (10 minutes on average)..."
-    $MINER --cli="$CLI" generate --grind-cmd="$GRIND" --min-nbits --descriptor="$MINING_DESC" --poisson --ongoing
-}
-
-# Poisson mode: the miner picks the block times, so check every 10s for a new
+# The miner picks the block times, so check every 10s for a new
 # block and send the fee transactions after it. Skipped until the first
 # coinbase is spendable (block 101).
 poll_fee_txs() {
@@ -68,27 +63,16 @@ poll_fee_txs() {
     done
 }
 
-mine_fixed() {
-    echo "Mining a block every ${BLOCK_MINING_SEC}s..."
-    while true; do
-        START=$(date +%s)
-        send_fee_txs
-        $MINER --cli="$CLI" generate --grind-cmd="$GRIND" --min-nbits --descriptor="$MINING_DESC" --set-block-time=-1 || \
-            echo "Failed to mine a block, retrying in ${BLOCK_MINING_SEC}s"
-        ELAPSED=$(( $(date +%s) - START ))
-        if [ "$ELAPSED" -lt "$BLOCK_MINING_SEC" ]; then
-            sleep $(( BLOCK_MINING_SEC - ELAPSED ))
-        fi
-    done
-}
-
 mine() {
+    local poisson=()
     bootstrap
     if [ "$POISSON" = true ]; then
-        mine_poisson
+        echo "Mining with Poisson distribution (10 minutes on average)..."
+        poisson=(--poisson)
     else
-        mine_fixed
+        echo "Mining a block every 10 minutes..."
     fi
+    $MINER --cli="$CLI" generate --grind-cmd="$GRIND" --min-nbits --descriptor="$MINING_DESC" "${poisson[@]}" --ongoing
 }
 
 # docker stop sends SIGTERM to PID 1: stop mining and shut bitcoind down cleanly
@@ -117,10 +101,8 @@ trap shutdown TERM INT
 # returns, while `wait` is interrupted by the signal straight away
 mine &
 MINER_PID=$!
-if [ "$POISSON" = true ]; then
-    poll_fee_txs &
-    FEE_POLLER_PID=$!
-fi
+poll_fee_txs &
+FEE_POLLER_PID=$!
 STATUS=0
 wait "$MINER_PID" || STATUS=$?
 echo "Miner exited with status ${STATUS}"
