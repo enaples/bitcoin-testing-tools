@@ -155,12 +155,18 @@ services:
       - GL_TESTING_ADVERTISE_HOST=${GL_ADVERTISE_HOST:-0.0.0.0}
       - GL_TESTING_BIND_HOST=0.0.0.0
       - GL_TESTING_SCHEDULER_PORT=2601
+      # LSPS2 node every Greenlight node peers with. Its node id is read from
+      # the file cln writes on its volume; GL_LSP=<node_id>@<host>:<port> overrides it.
+      - GL_TESTING_LSP=${GL_LSP:-}
+      - GL_LSP_NODE_ID_FILE=/lightningd/node_id
+      - GL_LSP_ADDR=cln:39735
     ports:
       - 2601:2601
       - 40000-40199:40000-40199
     volumes:
       - ./gl-testserver/data:/data
       - shared_vol_gl_clnvm:/opt/clnvm
+      - shared_vol_ln:/lightningd:ro
     depends_on:
       btc_sig_miner:
         condition: service_healthy
