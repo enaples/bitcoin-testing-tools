@@ -1,0 +1,60 @@
+#!/usr/bin/env -S uv run --quiet --script
+# /// script
+# # coincurve (via pyln-proto) has no wheels past CPython 3.14
+# requires-python = ">=3.10,<3.15"
+# dependencies = ["pyln-client"]
+# ///
+"""A simple implementation of a LSPS2 compatible policy plugin. It is the job
+of this plugin to deliver a fee options menu to the LSPS2 service plugin.
+
+Targets the service from ElementsProject/lightning#8948 (MPP support), which
+calls `lsps2-policy-buy` where the in-tree one called
+`lsps2-policy-getchannelcapacity`.
+"""
+
+from pyln.client import Plugin
+from datetime import datetime, timedelta, timezone
+
+
+plugin = Plugin()
+
+
+@plugin.method("lsps2-policy-getpolicy")
+def lsps2_policy_getpolicy(request, token=None):
+    """Returns an opening fee menu for the LSPS2 plugin."""
+    now = datetime.now(timezone.utc)
+
+    # Is ISO 8601 format "YYYY-MM-DDThh:mm:ss.uuuZ"
+    valid_until = (now + timedelta(hours=1)).isoformat().replace("+00:00", "Z")
+
+    return {
+        "policy_opening_fee_params_menu": [
+            {
+                "min_fee_msat": "1000",
+                "proportional": 1000,
+                "valid_until": valid_until,
+                "min_lifetime": 2000,
+                "max_client_to_self_delay": 2016,
+                "min_payment_size_msat": "1000",
+                "max_payment_size_msat": "100000000",
+            },
+            {
+                "min_fee_msat": "1092000",
+                "proportional": 2400,
+                "valid_until": valid_until,
+                "min_lifetime": 1008,
+                "max_client_to_self_delay": 2016,
+                "min_payment_size_msat": "1000",
+                "max_payment_size_msat": "1000000",
+            },
+        ]
+    }
+
+
+@plugin.method("lsps2-policy-buy")
+def lsps2_policy_buy(request, opening_fee_params, payment_size_msat=None):
+    """Returns the capacity of the JIT channel opened for a buy request."""
+    return {"channel_capacity_msat": "100000000"}
+
+
+plugin.run()

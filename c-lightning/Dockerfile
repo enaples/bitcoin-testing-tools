@@ -1,7 +1,13 @@
 # syntax=docker/dockerfile:1
 ARG OS_VER=noble
 ARG BITCOIND_VER=28.1
-ARG CLN_VER=26.06.8
+ARG CLN_VER=26.06.10
+# LSPS plugin (cln-lsps-service / cln-lsps-client) built from
+# ElementsProject/lightning#8948, which adds MPP support to the LSPS2 service and
+# is not in any release. Pinned to the PR head; bump to follow the PR.
+ARG LSPS_REPO=https://github.com/ElementsProject/lightning.git
+ARG LSPS_REF=0d05e5b3d41ab6c44d04c5003bec400bc7956c55
+ARG RUST_VER=1.90
 ARG DEBIAN_FRONTEND=noninteractive
 
 ##################################
@@ -78,6 +84,22 @@ RUN cln-download-verified.sh clightning-v${CLN_VER}.zip && \
 FROM cln-${TARGETARCH} AS cln
 
 ##################################
+### Building Stage 4: LSPS plugin from the MPP pull request
+##################################
+# Only the plugin crate is built: it talks JSON-RPC to the released lightningd,
+# so its two binaries replace the released ones.
+FROM rust:${RUST_VER}-slim-bookworm AS lsps
+ARG LSPS_REPO
+ARG LSPS_REF
+ADD ${LSPS_REPO}#${LSPS_REF} /src
+WORKDIR /src
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/src/target \
+    cargo build --release --locked -p cln-lsps && \
+    install -D -t /out/usr/local/libexec/c-lightning/plugins \
+        target/release/cln-lsps-service target/release/cln-lsps-client
+
+##################################
 ### Final runtime image: only what lightningd and the helper scripts need
 ##################################
 FROM ubuntu:${OS_VER}
@@ -89,9 +111,15 @@ RUN apt-get update -qq && apt-get install -qq -y --no-install-recommends \
 
 COPY --from=bitcoin /out/ /
 COPY --from=cln /out/ /
+COPY --from=lsps /out/ /
 
 # Fail the build if any runtime library is missing
 RUN lightningd --version && bitcoin-cli --version | head -1
+
+# Fail the build if the LSPS service is not the MPP one (only it has this option)
+RUN printf '{"jsonrpc":"2.0","id":1,"method":"getmanifest","params":{}}\n\n' \
+    | LIGHTNINGD_PLUGIN=1 timeout 10 /usr/local/libexec/c-lightning/plugins/cln-lsps-service \
+    | grep -q dev-lsps2-collect-timeout
 
 # LSPS2 policy plugin: uv runs it, its deps (and Python) are installed now
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
@@ -101,7 +129,7 @@ RUN uv sync --script /usr/local/lib/cln-plugins/lsps2_policy.py
 # Fail the build if lightningd could not start the plugin
 RUN printf '{"jsonrpc":"2.0","id":1,"method":"getmanifest","params":{}}\n\n' \
     | LIGHTNINGD_PLUGIN=1 /usr/local/lib/cln-plugins/lsps2_policy.py \
-    | grep -q lsps2-policy-getpolicy
+    | grep -q lsps2-policy-buy
 
 ENV BTC_HOST="btc_sig_miner"
 ENV FAUCET_URL="faucet"
